@@ -1,0 +1,61 @@
+import mongoose from "mongoose";
+import bcrypt from "bcrypt";
+
+const UserSchema = new mongoose.Schema(
+  {
+    userName: {
+      type: String,
+      trim: true,
+      required: [true, "Please provide an a username"],
+    },
+    lastName: {
+      type: String,
+      trim: true,
+      required: [true, "Please provide an last name"],
+    },
+    email: {
+      type: String,
+      required: [true, "Please provide an email"],
+      trim: true,
+      lowercase: true,
+      match: [
+        /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
+        "Please provide a valid email",
+      ],
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: [true, "Please provide a password"],
+      minLength: [3, "Password is too short"],
+    },
+    phoneNumber: {
+      type: String,
+      required: [true, "Please provide a phone number"],
+    },
+    role: {
+      type: String,
+      enum: ["user", "driver", "admin"],
+      default: "user",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+UserSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    return next();
+  }
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password.toLowerCase(), salt);
+  next();
+});
+
+UserSchema.methods.comparePassword = async function (incomingPassword) {
+  const isMatch = await bcrypt.compare(incomingPassword, this.password);
+  return isMatch;
+};
+
+export default mongoose.model("User", UserSchema);
