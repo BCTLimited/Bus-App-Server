@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 
-const UserProfileSchema = new mongoose.Schema(
+const { Schema } = mongoose;
+
+const UserProfileSchema = new Schema(
   {
     userId: {
       type: mongoose.Types.ObjectId,
@@ -26,7 +28,7 @@ const UserProfileSchema = new mongoose.Schema(
       trim: true,
     },
     trips: {
-      type: [{ type: mongoose.Types.ObjectId, ref: "Trip" }],
+      type: [{ type: Schema.Types.ObjectId, ref: "Trip" }],
     },
   },
   {

@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
 
+const { Schema } = mongoose;
+
 // Define the Bus schema
-const TripSchema = new mongoose.Schema(
+const TripSchema = new Schema(
   {
     paymentType: {
       type: String,
@@ -20,6 +22,10 @@ const TripSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    tripType: {
+      type: String,
+      default: "One Way",
+    },
     pickUp: {
       type: String,
       required: true,
@@ -36,12 +42,12 @@ const TripSchema = new mongoose.Schema(
       required: true,
     },
     bookedBy: {
-      type: mongoose.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "UserProfile",
       required: true,
     },
-    bus: {
-      type: mongoose.Types.ObjectId,
+    busId: {
+      type: Schema.Types.ObjectId,
       ref: "Bus",
       required: true,
     },
