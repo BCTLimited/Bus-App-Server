@@ -1,42 +1,27 @@
+import asyncWrapper from "../middlewares/asyncWrapper.js";
 import BusService from "../services/busService.js";
 
-const getAvailableBuses = async (req, res, next) => {
-  try {
-    const { pickUp, dropOff } = req.query;
-    const buses = await BusService.getAvailableBuses(pickUp, dropOff);
-    res.status(200).json({ buses });
-  } catch (error) {
-    next(error);
-  }
-};
+const getAvailableBuses = asyncWrapper(async (req, res, next) => {
+  // const { pickUp, dropOff } = req.query;
+  const buses = await BusService.getAvailableBuses();
+  res.status(200).json({ buses });
+});
 
-const addNewBus = async (req, res, next) => {
-  try {
-    const bus = await BusService.addNewBus(req.body);
-    res.status(200).json({ message: "Bus Added", bus });
-  } catch (error) {
-    next(error);
-  }
-};
+const addNewBus = asyncWrapper(async (req, res, next) => {
+  const bus = await BusService.addNewBus(req.body);
+  res.status(200).json({ message: "Bus Added", bus });
+});
 
-const updateBus = async (req, res, next) => {
+const updateBus = asyncWrapper(async (req, res, next) => {
   const { id } = req.params;
-  try {
-    const bus = await BusService.updateBus(id, req.body);
-    res.status(200).json({ message: "Bus Updated", bus });
-  } catch (error) {
-    next(error);
-  }
-};
+  const bus = await BusService.updateBus(id, req.body);
+  res.status(200).json({ message: "Bus Updated", bus });
+});
 
-const getBusDetails = async (req, res, next) => {
+const getBusDetails = asyncWrapper(async (req, res, next) => {
   const { id } = req.params;
-  try {
-    const bus = await BusService.getBusDetails(id);
-    res.status(200).json({ bus });
-  } catch (error) {
-    next(error);
-  }
-};
+  const bus = await BusService.getBusDetails(id);
+  res.status(200).json({ bus });
+});
 
 export { getAvailableBuses, addNewBus, updateBus, getBusDetails };

@@ -1,12 +1,12 @@
 import Trip from "../../src/models/trip.js";
-import Bus from "../models/bus.js";
+import Route from "../models/route.js";
 import UserProfile from "../models/userProfile.js";
 import customError from "../utils/customError.js";
 import validateMongoId from "../utils/validateMongoId.js";
 
 async function bookTrip(userId, tripDetails) {
-  console.log(userId);
-  console.log(tripDetails);
+  // console.log(userId);
+  // console.log(tripDetails);
   const requiredFields = [
     "paymentType",
     "fare",
@@ -14,7 +14,7 @@ async function bookTrip(userId, tripDetails) {
     "dropOff",
     "departureTime",
     "seatNumber",
-    "busId",
+    "routeId",
   ];
   // Checks for all fields needed
   const missingField = requiredFields.find((field) => !tripDetails[field]);
@@ -22,13 +22,17 @@ async function bookTrip(userId, tripDetails) {
     throw customError(400, `${missingField} is required!`);
   }
   // Verifies busId is a valid mongoDB Id
-  if (!validateMongoId(tripDetails.busId)) {
-    throw customError(400, `${tripDetails.busId} is not a valid ID`);
+  if (!validateMongoId(tripDetails.routeId)) {
+    throw customError(400, `${tripDetails.routeId} is not a valid ID`);
   }
 
   try {
     const userProfile = await UserProfile.findOne({ _id: userId });
-    await updateSeatAvailability(tripDetails.busId, tripDetails.seatNumber);
+    await updateSeatAvailability(
+      tripDetails.routeId,
+      tripDetails.seatNumber,
+      userId
+    );
     const trip = await Trip.create({
       bookedBy: userProfile._id,
       ...tripDetails,
@@ -40,34 +44,39 @@ async function bookTrip(userId, tripDetails) {
   }
 }
 
-async function updateSeatAvailability(busId, seatNumber) {
+async function updateSeatAvailability(routeId, seatNumbers, userId) {
   try {
     // Find the bus by its ID
-    const bus = await Bus.findById(busId);
+    const busRoute = await Route.findById(routeId);
 
-    if (!bus) {
-      throw customError(400, "Bus not found");
+    if (!busRoute) {
+      throw customError(400, "Bus Route not found");
     }
 
-    // Find the seat by its number
-    const seat = bus.seats.find((seat) => seat.seatNumber === seatNumber);
+    // Loop through each seat number in the array
+    for (const seatNumber of seatNumbers) {
+      // Find the seat by its number
+      const seat = busRoute.seats.find(
+        (seat) => seat.seatNumber === seatNumber
+      );
+      if (!seat) {
+        throw customError(404, `Seat ${seatNumber} not found`);
+      }
 
-    if (!seat) {
-      throw customError(400, "Seat not found");
+      // Check if the seat is available
+      if (!seat.available) {
+        throw customError(400, `Seat ${seatNumber} is already occupied`);
+      }
+
+      // Update the seat's availability to false
+      seat.available = false;
+      seat.occupiedBy = userId;
     }
-
-    // Check if the seat is available
-    if (!seat.available) {
-      throw customError(400, "Seat is already occupied");
-    }
-
-    // Update the seat's availability to false
-    seat.available = false;
 
     // Save the changes
-    await bus.save();
+    await busRoute.save();
 
-    console.log(`Seat ${seatNumber} on bus ${busId} updated successfully`);
+    console.log(`Seat ${seatNumbers} on bus ${routeId} updated successfully`);
   } catch (error) {
     console.error("Error occurred:", error.message);
     throw error;

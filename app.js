@@ -17,6 +17,8 @@ const port = process.env.PORT || 3000;
 import authRouter from "./src/routes/auth.js";
 import busRouter from "./src/routes/bus.js";
 import tripRouter from "./src/routes/trip.js";
+import driverRouter from "./src/routes/driver.js";
+import routeRouter from "./src/routes/route.js";
 
 app.use(cors());
 app.use(helmet());
@@ -33,8 +35,12 @@ if (process.env.NODE_ENV === "dev") {
 }
 
 app.use("/api/auth", authRouter);
-app.use("/api/bus", busRouter);
 app.use("/api/trip", tripRouter);
+
+// Admin routes
+app.use("/api/driver", driverRouter);
+app.use("/api/bus", busRouter);
+app.use("/api/route", routeRouter);
 
 app.use(notFound);
 app.use(errorMiddleware);

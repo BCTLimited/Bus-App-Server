@@ -36,9 +36,10 @@ const TripSchema = new Schema(
     },
     departureTime: {
       type: String,
+      required: true,
     },
     seatNumber: {
-      type: Number,
+      type: [Number],
       required: true,
     },
     bookedBy: {
@@ -46,9 +47,9 @@ const TripSchema = new Schema(
       ref: "UserProfile",
       required: true,
     },
-    busId: {
+    routeId: {
       type: Schema.Types.ObjectId,
-      ref: "Bus",
+      ref: "Route",
       required: true,
     },
   },

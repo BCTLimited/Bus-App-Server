@@ -1,0 +1,97 @@
+import mongoose from "mongoose";
+
+const { Schema } = mongoose;
+
+// Define the Bus schema
+const RouteSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    pickUp: {
+      type: String,
+      required: true,
+    },
+    dropOff: {
+      type: String,
+      required: true,
+    },
+    departureTime: {
+      type: String,
+      default: "12:00 PM",
+      required: [true, "Please Provide a Departure Time"],
+    },
+    status: {
+      type: String,
+      enum: {
+        values: ["pending", "inProgress", "success", "cancelled"],
+        message:
+          "Status must be either 'pending', 'inProgress', 'success' or 'cancelled'",
+      },
+    },
+    driver: {
+      type: Schema.Types.ObjectId,
+      ref: "Driver",
+      required: [true, "Please provide a Driver"],
+    },
+    bus: {
+      type: Schema.Types.ObjectId,
+      ref: "Bus",
+      required: [true, "Please provide a Bus"],
+    },
+    route: {
+      type: [
+        {
+          locationName: {
+            type: String,
+            required: true,
+          },
+          lat: {
+            type: Number,
+            required: true,
+          },
+          lng: {
+            type: Number,
+            required: true,
+          },
+        },
+      ],
+      required: true,
+    },
+    seats: {
+      type: [
+        {
+          seatNumber: {
+            type: Number,
+          },
+          available: {
+            type: Boolean,
+            default: true,
+          },
+          occupiedBy: {
+            type: Schema.Types.ObjectId,
+            ref: "UserProfile",
+          },
+        },
+      ],
+      default: Array.from({ length: 14 }, (_, index) => ({
+        seatNumber: index + 1,
+        available: true,
+      })),
+    },
+    price: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// Indexes
+RouteSchema.index({ pickUp: 1, dropOff: 1 });
+
+export default mongoose.model("Route", RouteSchema);
