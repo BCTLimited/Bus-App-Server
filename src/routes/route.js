@@ -1,6 +1,6 @@
 import express from "express";
 import methodNotAllowed from "../utils/methodNotAllowed.js";
-import { auth } from "../middlewares/auth.js";
+import { isAdminOrDriver, isAdmin } from "../middlewares/auth.js";
 import {
   addNewRoute,
   getAvailableRoutes,
@@ -10,16 +10,15 @@ import {
 
 const router = express.Router();
 
-// User Routes
 router
   .route("/")
   .get(getAvailableRoutes)
-  .post(addNewRoute)
+  .post(isAdmin, addNewRoute)
   .all(methodNotAllowed);
 router
   .route("/:id")
   .get(getRouteDetails)
-  .patch(updateRoute)
+  .patch(isAdminOrDriver, updateRoute)
   .all(methodNotAllowed);
 
 export default router;

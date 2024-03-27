@@ -29,13 +29,14 @@ const RouteSchema = new Schema(
         message:
           "Status must be either 'pending', 'inProgress', 'success' or 'cancelled'",
       },
+      default: "pending",
     },
-    driver: {
+    driverId: {
       type: Schema.Types.ObjectId,
       ref: "Driver",
       required: [true, "Please provide a Driver"],
     },
-    bus: {
+    busId: {
       type: Schema.Types.ObjectId,
       ref: "Bus",
       required: [true, "Please provide a Bus"],

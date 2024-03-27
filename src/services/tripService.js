@@ -27,7 +27,7 @@ async function bookTrip(userId, tripDetails) {
   }
 
   try {
-    const userProfile = await UserProfile.findOne({ _id: userId });
+    const userProfile = await UserProfile.findOne({ userId });
     await updateSeatAvailability(
       tripDetails.routeId,
       tripDetails.seatNumber,

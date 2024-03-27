@@ -10,7 +10,6 @@ import {
 
 const router = express.Router();
 
-// User Routes
 router
   .route("/")
   .get(auth, getAvailableBuses)

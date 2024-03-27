@@ -5,7 +5,6 @@ import { bookTrip } from "../controllers/trip.js";
 
 const router = express.Router();
 
-// User Routes
 router.route("/").get(auth).post(auth, bookTrip).all(methodNotAllowed);
 // router.route("/:id").get().patch().all(methodNotAllowed);
 

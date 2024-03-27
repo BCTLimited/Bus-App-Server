@@ -51,8 +51,25 @@ UserSchema.pre("save", async function (next) {
     return next();
   }
   const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password.toLowerCase(), salt);
+  this.password = await bcrypt.hash(this.password, salt);
+  console.log("password hashed");
   next();
+});
+
+UserSchema.pre("findOneAndUpdate", async function (next) {
+  // Check if the password is being modified
+  if (!this._update.password) {
+    return next();
+  }
+  try {
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(this._update.password, salt);
+    this._update.password = hashedPassword;
+    console.log("Password hashed for update");
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 UserSchema.methods.comparePassword = async function (incomingPassword) {

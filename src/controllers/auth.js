@@ -50,21 +50,25 @@ const signInUser = asyncWrapper(async (req, res, next) => {
   if (!user) {
     throw customError(401, "No User with this Email");
   }
+  
+  await userService.validatePassword(user._id, password);
 
   const userProfile = await UserProfile.findOne({ userId: user._id });
 
-  await userService.validatePassword(userProfile._id, password);
   // Checks if user email has been verified
   if (!userProfile.isVerified) {
     throw customError(401, "Email not verified!");
   }
 
   //generate new token
-  const token = generateToken(userProfile._id);
+  const token = generateToken(user._id);
 
-  res
-    .status(200)
-    .json({ id: userProfile._id, token, image: userProfile.image });
+  res.status(200).json({
+    id: userProfile._id,
+    token,
+    role: user.role,
+    image: userProfile.image,
+  });
 });
 
 //GET USER
@@ -72,10 +76,10 @@ const getUser = asyncWrapper(async (req, res, next) => {
   const { userId } = req.user;
 
   // Retrieve user profile with populated user information excluding certain fields
-  const userProfile = await UserProfile.findOne({ _id: userId })
+  const userProfile = await UserProfile.findOne({ userId })
     .populate({
       path: "userId",
-      select: "-_id -password -phoneNumber -role -__v -createdAt -updatedAt",
+      select: "-_id -password -__v",
     })
     .select("-__v -createdAt -updatedAt -isVerified");
 

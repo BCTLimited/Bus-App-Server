@@ -19,6 +19,8 @@ import busRouter from "./src/routes/bus.js";
 import tripRouter from "./src/routes/trip.js";
 import driverRouter from "./src/routes/driver.js";
 import routeRouter from "./src/routes/route.js";
+import { auth, isAdmin } from "./src/middlewares/auth.js";
+import rateLimitMiddleware from "./src/middlewares/rateLimitMiddleware.js";
 
 app.use(cors());
 app.use(helmet());
@@ -34,13 +36,17 @@ if (process.env.NODE_ENV === "dev") {
   app.use(morgan("dev"));
 }
 
+// Apply the rate limiter to all requests
+app.use(rateLimitMiddleware);
+
+// General Routes
 app.use("/api/auth", authRouter);
-app.use("/api/trip", tripRouter);
+app.use("/api/trip", auth, tripRouter);
 
 // Admin routes
-app.use("/api/driver", driverRouter);
-app.use("/api/bus", busRouter);
-app.use("/api/route", routeRouter);
+app.use("/api/driver", auth, isAdmin, driverRouter);
+app.use("/api/bus", auth, isAdmin, busRouter);
+app.use("/api/route", auth, routeRouter);
 
 app.use(notFound);
 app.use(errorMiddleware);

@@ -5,12 +5,9 @@ const { Schema } = mongoose;
 // Define the Bus schema
 const DriverSchema = new Schema(
   {
-    firstName: {
-      type: String,
-      required: true,
-    },
-    lastName: {
-      type: String,
+    userId: {
+      type: mongoose.Types.ObjectId,
+      ref: "User",
       required: true,
     },
     licenseIssueDate: {

@@ -21,22 +21,23 @@ async function updateUserProfile(userId, userDetails) {
   try {
     // Updating userProfile model
     const userProfile = await UserProfile.findOneAndUpdate(
-      { _id: userId },
+      { userId },
       userDetails
     );
     return { message: "Details Updated Successfully!", userProfile };
   } catch (error) {
+    console.log(`Error updating userProfile Model ${error.message}`);
     throw error;
   }
 }
 
 async function updateUserModel(userId, userInfo) {
-  const userProfile = await UserProfile.findOne({ _id: userId });
   try {
     // Updating user model
-    await User.findOneAndUpdate({ _id: userProfile.userId }, userInfo);
+    await User.findOneAndUpdate({ _id: userId }, userInfo);
     return { message: "User Info Updated Successfully!" };
   } catch (error) {
+    console.log(`Error updating user Model ${error.message}`);
     throw error;
   }
 }
@@ -45,12 +46,8 @@ async function validatePassword(userId, password) {
   if (!password) {
     throw customError(401, "Please provide password");
   }
-  const userProfile = await UserProfile.findOne({ _id: userId });
-  if (!userProfile) {
-    throw customError(404, "This User Doesn't Exist");
-  }
 
-  const user = await User.findOne({ _id: userProfile.userId });
+  const user = await User.findById(userId);
   const isPasswordCorrect = await user.comparePassword(password);
 
   if (!isPasswordCorrect) {
@@ -60,7 +57,12 @@ async function validatePassword(userId, password) {
 
 async function isUserVerified(userId) {
   const userProfile = await UserProfile.findOne({ userId });
-  return userProfile && userProfile.isVerified;
+
+  if (!userProfile) {
+    throw customError(404, "User doesn't exist");
+  }
+
+  return userProfile.isVerified;
 }
 
 export default {

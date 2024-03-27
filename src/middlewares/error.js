@@ -12,7 +12,8 @@ const errorMiddleware = (err, req, res, next) => {
         field === "email" ||
         field === "username" ||
         field === "phoneNumber" ||
-        field === "paymentType"
+        field === "paymentType" ||
+        field === "status"
       ) {
         errorMessage = err.errors[field].message;
         statusCode = 400;

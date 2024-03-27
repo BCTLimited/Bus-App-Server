@@ -23,4 +23,10 @@ const getDriverDetails = asyncWrapper(async (req, res) => {
   res.status(200).json({ driver });
 });
 
+const updateDriverPassword = asyncWrapper(async (req, res) => {
+  const { id } = req.params;
+  const driver = await DriverService.getDriverDetails(id);
+  res.status(200).json({ driver });
+});
+
 export { getAllDrivers, addNewDriver, updateDriver, getDriverDetails };

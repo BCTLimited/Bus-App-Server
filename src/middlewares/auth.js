@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import customError from "../utils/customError.js";
 import User from "../models/user.js";
+import UserProfile from "../models/userProfile.js";
 
 const auth = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -20,15 +21,34 @@ const auth = (req, res, next) => {
   }
 };
 
-const isAdmin = async (req, res, next) => {
+const isAdminOrDriver = async (req, res, next) => {
   const { userId } = req.user;
-  const user = await User.findOne({ _id: userId });
+  const userProfile = await UserProfile.findOne({ userId }).populate({
+    path: "userId",
+  });
 
-  if (!user || user.role !== "admin") {
+  if (
+    !userProfile ||
+    (userProfile.userId.role !== "admin" &&
+      userProfile.userId.role !== "driver")
+  ) {
     return next(customError(401, "Unauthorized"));
   }
 
   next();
 };
 
-export { auth, isAdmin };
+const isAdmin = async (req, res, next) => {
+  const { userId } = req.user;
+  const userProfile = await UserProfile.findOne({ userId }).populate({
+    path: "userId",
+  });
+
+  if (!userProfile || userProfile.userId.role !== "admin") {
+    return next(customError(401, "Unauthorized, Admin Only"));
+  }
+
+  next();
+};
+
+export { auth, isAdmin, isAdminOrDriver };
