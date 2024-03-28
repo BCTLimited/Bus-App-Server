@@ -22,6 +22,10 @@ const RouteSchema = new Schema(
       default: "12:00 PM",
       required: [true, "Please Provide a Departure Time"],
     },
+    departureDate: {
+      type: String,
+      required: [true, "Please Provide a Departure Date"],
+    },
     status: {
       type: String,
       enum: {

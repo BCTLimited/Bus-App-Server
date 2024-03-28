@@ -25,9 +25,14 @@ async function getAvailableRoutes(pickUp, dropOff) {
     const routes = await Route.find(conditions)
       .select(excludedFields)
       .populate({
-        path: "driverId busId",
+        path: "driverId",
         select: excludedFields,
+        populate: {
+          path: "userId",
+          select: excludedFields,
+        },
       })
+      .populate({ path: "busId", select: excludedFields })
       .populate({
         path: "seats.occupiedBy",
         select: excludedFields,
@@ -35,7 +40,8 @@ async function getAvailableRoutes(pickUp, dropOff) {
           path: "userId",
           select: excludedFields,
         },
-      });
+      })
+      .lean();
 
     return routes;
   } catch (error) {
@@ -49,6 +55,7 @@ async function addNewRoute(routeDetails) {
     "pickUp",
     "dropOff",
     "departureTime",
+    "departureDate",
     "price",
     "busId",
     "driverId",
