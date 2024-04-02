@@ -149,10 +149,6 @@ async function getRouteDetails(routeId) {
       .populate({
         path: "seats.occupiedBy",
         select: excludedFields,
-        populate: {
-          path: "userId",
-          select: excludedFields,
-        },
       })
       .lean();
     if (!route) {
