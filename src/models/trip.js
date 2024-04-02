@@ -18,10 +18,6 @@ const TripSchema = new Schema(
       enum: ["pending", "success"],
       default: "pending",
     },
-    fare: {
-      type: Number,
-      required: true,
-    },
     tripType: {
       type: String,
       default: "One Way",
@@ -34,17 +30,13 @@ const TripSchema = new Schema(
       type: String,
       required: true,
     },
-    departureTime: {
-      type: String,
-      required: true,
-    },
     seatNumber: {
       type: [Number],
       required: true,
     },
     bookedBy: {
       type: Schema.Types.ObjectId,
-      ref: "UserProfile",
+      ref: "User",
       required: true,
     },
     routeId: {

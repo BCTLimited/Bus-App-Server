@@ -11,7 +11,7 @@ const RatingSchema = new Schema(
     },
     reviewer: {
       type: Schema.Types.ObjectId,
-      ref: "UserProfile",
+      ref: "User",
       required: true,
     },
     value: {

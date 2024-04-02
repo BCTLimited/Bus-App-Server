@@ -1,3 +1,4 @@
+import Driver from "../models/driver.js";
 import Route from "../models/route.js";
 import customError from "../utils/customError.js";
 import validateMongoId from "../utils/validateMongoId.js";
@@ -13,6 +14,7 @@ const excludedFields = [
   "-phoneNumber",
   "-password",
   "-role",
+  "-ratings",
 ];
 
 async function getAvailableRoutes(pickUp, dropOff) {
@@ -27,19 +29,16 @@ async function getAvailableRoutes(pickUp, dropOff) {
       .populate({
         path: "driverId",
         select: excludedFields,
-        populate: {
-          path: "userId",
-          select: excludedFields,
-        },
+        
       })
       .populate({ path: "busId", select: excludedFields })
       .populate({
         path: "seats.occupiedBy",
         select: excludedFields,
-        populate: {
-          path: "userId",
-          select: excludedFields,
-        },
+        // populate: {
+        //   path: "userId",
+        //   select: excludedFields,
+        // },
       })
       .lean();
 
@@ -107,16 +106,51 @@ async function updateRoute(routeId, updatedDetails) {
   }
 }
 
+async function deleteRoute(routeId) {
+  if (!validateMongoId(routeId)) {
+    throw customError(400, `${routeId} is not a valid ID`);
+  }
+  try {
+    const route = await Route.findById(routeId);
+
+    if (!route) {
+      throw customError(404, "Route not found");
+    }
+
+    // Check if any seat has been booked
+    const anySeatNotAvailable = route.seats.find(
+      (seat) => seat.available === false
+    );
+
+    if (anySeatNotAvailable) {
+      throw customError(400, "At least one seat on this route has been taken");
+    }
+
+    await route.deleteOne();
+
+    return route;
+  } catch (error) {
+    console.log("Error getting route details: " + error.message);
+    throw error;
+  }
+}
+
 async function getRouteDetails(routeId) {
   if (!validateMongoId(routeId)) {
     throw customError(400, `${routeId} is not a valid ID`);
   }
   try {
     const route = await Route.findById(routeId)
+      .select(excludedFields)
       .populate({
-        path: "driver bus",
+        path: "driverId",
         select: excludedFields,
+        populate: {
+          path: "userId",
+          select: excludedFields,
+        },
       })
+      .populate({ path: "busId", select: excludedFields })
       .populate({
         path: "seats.occupiedBy",
         select: excludedFields,
@@ -124,7 +158,8 @@ async function getRouteDetails(routeId) {
           path: "userId",
           select: excludedFields,
         },
-      });
+      })
+      .lean();
     if (!route) {
       throw customError(404, "Route not found");
     }
@@ -135,9 +170,41 @@ async function getRouteDetails(routeId) {
   }
 }
 
+async function getDriverRoutes(userId) {
+  const driver = await Driver.findOne({ userId });
+  try {
+    const routes = await Route.find({ driverId: driver?._id })
+      .select(excludedFields)
+      .populate({
+        path: "driverId",
+        select: excludedFields,
+        populate: {
+          path: "userId",
+          select: excludedFields,
+        },
+      })
+      .populate({ path: "busId", select: excludedFields })
+      .populate({
+        path: "seats.occupiedBy",
+        select: excludedFields,
+        populate: {
+          path: "userId",
+          select: excludedFields,
+        },
+      })
+      .lean();
+
+    return routes;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export default {
   getAvailableRoutes,
   addNewRoute,
   updateRoute,
   getRouteDetails,
+  deleteRoute,
+  getDriverRoutes,
 };

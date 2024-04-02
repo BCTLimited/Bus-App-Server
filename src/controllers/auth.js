@@ -50,7 +50,7 @@ const signInUser = asyncWrapper(async (req, res, next) => {
   if (!user) {
     throw customError(401, "No User with this Email");
   }
-  
+
   await userService.validatePassword(user._id, password);
 
   const userProfile = await UserProfile.findOne({ userId: user._id });
@@ -64,7 +64,7 @@ const signInUser = asyncWrapper(async (req, res, next) => {
   const token = generateToken(user._id);
 
   res.status(200).json({
-    id: userProfile._id,
+    id: user._id,
     token,
     role: user.role,
     image: userProfile.image,

@@ -1,20 +1,28 @@
 import Trip from "../../src/models/trip.js";
 import Route from "../models/route.js";
-import UserProfile from "../models/userProfile.js";
+import TripCode from "../models/tripCode.js";
 import customError from "../utils/customError.js";
+import generateUniqueCode from "../utils/generateUniqueCode.js";
 import validateMongoId from "../utils/validateMongoId.js";
+
+const excludedFields = [
+  "-__v",
+  "-createdAt",
+  "-updatedAt",
+  "-password",
+  "-role",
+];
 
 async function bookTrip(userId, tripDetails) {
   // console.log(userId);
   // console.log(tripDetails);
   const requiredFields = [
     "paymentType",
-    "fare",
     "pickUp",
     "dropOff",
-    "departureTime",
     "seatNumber",
     "routeId",
+    "paymentStatus",
   ];
   // Checks for all fields needed
   const missingField = requiredFields.find((field) => !tripDetails[field]);
@@ -26,61 +34,95 @@ async function bookTrip(userId, tripDetails) {
     throw customError(400, `${tripDetails.routeId} is not a valid ID`);
   }
 
-  try {
-    const userProfile = await UserProfile.findOne({ userId });
-    await updateSeatAvailability(
-      tripDetails.routeId,
-      tripDetails.seatNumber,
-      userId
-    );
-    const trip = await Trip.create({
-      bookedBy: userProfile._id,
-      ...tripDetails,
-    });
-    return trip;
-  } catch (error) {
-    console.log("Error getting available buses: " + error.message);
-    throw error;
-  }
+  await updateSeatAvailability(
+    tripDetails.routeId,
+    tripDetails.seatNumber,
+    userId
+  );
+
+  const trip = await Trip.create({
+    bookedBy: userId,
+    ...tripDetails,
+  });
+  return trip;
 }
+
+async function getAllTrips(userId) {
+  const trips = await Trip.find({ bookedBy: userId }).populate({
+    path: "bookedBy",
+    select: excludedFields,
+  });
+  return trips;
+}
+
+async function generateTripCode(tripId) {
+  if (!validateMongoId(tripId)) {
+    throw customError(400, `${tripId} is not a valid ID`);
+  }
+  const trip = await Trip.findByIdAndUpdate(tripId);
+
+  if (!trip) {
+    throw customError(404, `No Trip with ID: ${tripId}`);
+  }
+  const code = await generateUniqueCode();
+
+  await Route.findByIdAndUpdate(trip.routeId, {
+    $push: { passengers: { passenger: trip.bookedBy, code } },
+  });
+
+  const tripCode = await TripCode.create({ code, tripId });
+
+  return tripCode;
+}
+
+async function updateTrip(tripId, updatedDetails) {}
 
 async function updateSeatAvailability(routeId, seatNumbers, userId) {
   try {
-    // Find the bus by its ID
+    // Find the bus route by its ID
     const busRoute = await Route.findById(routeId);
 
+    // Throw an error if the bus route is not found
     if (!busRoute) {
       throw customError(400, "Bus Route not found");
     }
 
-    // Loop through each seat number in the array
-    for (const seatNumber of seatNumbers) {
+    // Check if any seat is not available
+    const anySeatNotAvailable = seatNumbers.some((seatNumber) => {
       // Find the seat by its number
       const seat = busRoute.seats.find(
         (seat) => seat.seatNumber === seatNumber
       );
-      if (!seat) {
-        throw customError(404, `Seat ${seatNumber} not found`);
-      }
+      // Return true if the seat is not found or not available, false otherwise
+      return !seat || !seat.available;
+    });
 
-      // Check if the seat is available
-      if (!seat.available) {
-        throw customError(400, `Seat ${seatNumber} is already occupied`);
-      }
-
-      // Update the seat's availability to false
-      seat.available = false;
-      seat.occupiedBy = userId;
+    // If any seat is not available, throw an error
+    if (anySeatNotAvailable) {
+      throw customError(400, "One or more seats are already occupied");
     }
 
-    // Save the changes
+    // All seats are available, update them
+    seatNumbers.forEach((seatNumber) => {
+      // Find the seat by its number
+      const seat = busRoute.seats.find(
+        (seat) => seat.seatNumber === seatNumber
+      );
+      // Update the seat availability and occupiedBy fields
+      seat.available = false;
+      seat.occupiedBy = userId;
+    });
+
+    // Save the changes to the bus route
     await busRoute.save();
 
+    // Log a success message
     console.log(`Seat ${seatNumbers} on bus ${routeId} updated successfully`);
   } catch (error) {
+    // Handle errors
     console.error("Error occurred:", error.message);
     throw error;
   }
 }
 
-export default { bookTrip };
+export default { bookTrip, getAllTrips, generateTripCode };

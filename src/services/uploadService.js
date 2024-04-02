@@ -1,6 +1,6 @@
-import cloudinary from "../utils/cloudinaryConfig";
+import cloudinary from "../utils/cloudinaryConfig.js";
 
-exports.uploadUserImage = async (tempFilePath) => {
+const uploadUserImage = async (tempFilePath) => {
   try {
     const { secure_url } = await cloudinary.uploader.upload(tempFilePath, {
       use_filename: true,
@@ -12,4 +12,4 @@ exports.uploadUserImage = async (tempFilePath) => {
   }
 };
 
-export { uploadUserImage };
+export default { uploadUserImage };

@@ -24,6 +24,12 @@ async function updateUserProfile(userId, userDetails) {
       { userId },
       userDetails
     );
+
+    if (!userProfile) {
+      throw customError(400, "User Profile Not Found");
+    }
+
+    console.log(userProfile);
     return { message: "Details Updated Successfully!", userProfile };
   } catch (error) {
     console.log(`Error updating userProfile Model ${error.message}`);
@@ -34,7 +40,10 @@ async function updateUserProfile(userId, userDetails) {
 async function updateUserModel(userId, userInfo) {
   try {
     // Updating user model
-    await User.findOneAndUpdate({ _id: userId }, userInfo);
+    const user = await User.findOneAndUpdate({ _id: userId }, userInfo);
+    if (!user) {
+      throw customError(400, "User Not Found");
+    }
     return { message: "User Info Updated Successfully!" };
   } catch (error) {
     console.log(`Error updating user Model ${error.message}`);

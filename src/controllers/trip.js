@@ -7,4 +7,17 @@ const bookTrip = asyncWrapper(async (req, res, next) => {
   res.status(200).json({ message: "Trip Booked", trip });
 });
 
-export { bookTrip };
+const getAllTrips = asyncWrapper(async (req, res, next) => {
+  const { userId } = req.user;
+  const trips = await TripService.getAllTrips(userId);
+  res.status(200).json({ trips });
+});
+
+const getTripCode = asyncWrapper(async (req, res, next) => {
+  const { userId } = req.user;
+  const { id } = req.params;
+  const result = await TripService.generateTripCode(id, userId);
+  res.status(200).json(result);
+});
+
+export { bookTrip, getTripCode, getAllTrips };

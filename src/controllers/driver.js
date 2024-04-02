@@ -13,17 +13,14 @@ const addNewDriver = asyncWrapper(async (req, res) => {
 
 const updateDriver = asyncWrapper(async (req, res) => {
   const { id } = req.params;
+  if (req.files && req.files.image) {
+    req.body.image = req.files.image;
+  }
   const driver = await DriverService.updateDriver(id, req.body);
-  res.status(200).json({ message: "Driver Updated", driver });
+  res.status(200).json({ message: "Driver Updated" });
 });
 
 const getDriverDetails = asyncWrapper(async (req, res) => {
-  const { id } = req.params;
-  const driver = await DriverService.getDriverDetails(id);
-  res.status(200).json({ driver });
-});
-
-const updateDriverPassword = asyncWrapper(async (req, res) => {
   const { id } = req.params;
   const driver = await DriverService.getDriverDetails(id);
   res.status(200).json({ driver });

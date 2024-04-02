@@ -76,7 +76,7 @@ const RouteSchema = new Schema(
           },
           occupiedBy: {
             type: Schema.Types.ObjectId,
-            ref: "UserProfile",
+            ref: "User",
           },
         },
       ],
@@ -84,6 +84,21 @@ const RouteSchema = new Schema(
         seatNumber: index + 1,
         available: true,
       })),
+    },
+    passengers: {
+      type: [
+        {
+          passenger: {
+            type: Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+          },
+          code: {
+            type: String,
+            required: true,
+          },
+        },
+      ],
     },
     price: {
       type: Number,

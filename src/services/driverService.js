@@ -2,11 +2,15 @@ import Driver from "../models/driver.js";
 import customError from "../utils/customError.js";
 import validateMongoId from "../utils/validateMongoId.js";
 import userService from "../services/userService.js";
+import uploadService from "./uploadService.js";
 
 const excludedFields = [
   "-__v",
   "-password",
   "-role",
+  "-homeLocation",
+  "-isVerified",
+  "-trips",
   "-createdAt",
   "-updatedAt",
 ];
@@ -14,7 +18,10 @@ const excludedFields = [
 async function getAllDrivers() {
   try {
     const drivers = await Driver.find()
-      .populate({ path: "userId", select: excludedFields })
+      .populate({
+        path: "userId",
+        select: excludedFields,
+      })
       .select(excludedFields);
     return drivers;
   } catch (error) {
@@ -72,16 +79,36 @@ async function updateDriver(driverId, updatedDetails) {
       throw customError(400, `${driverId} is not a valid ID`);
     }
 
-    const driver = await Driver.findByIdAndUpdate(driverId, updatedDetails, {
-      new: true,
-    }).select(excludedFields);
+    const driver = await Driver.findOneAndUpdate(
+      { _id: driverId },
+      updatedDetails,
+      {
+        new: true,
+      }
+    )
+      .populate({
+        path: "userId",
+        select: excludedFields,
+      })
+      .select(excludedFields);
 
     if (!driver) {
       throw customError(404, "Driver not found");
     }
 
-    await userService.updateUserModel(driver.userId, updatedDetails);
-    await userService.updateUserProfile(driver.userId, updatedDetails);
+    if (updatedDetails.image) {
+      // Upload the image
+      updatedDetails.image = await uploadService.uploadUserImage(
+        updatedDetails.image.tempFilePath
+      );
+    }
+
+    const userId = driver.userId._id;
+
+    console.log(userId);
+    // Update user model and profile
+    await userService.updateUserModel(userId, updatedDetails);
+    await userService.updateUserProfile(userId, updatedDetails);
 
     return driver;
   } catch (error) {
@@ -95,10 +122,16 @@ async function getDriverDetails(driverId) {
     throw customError(400, `${driverId} is not a valid ID`);
   }
   try {
-    const driver = await Driver.findById(driverId).select(excludedFields);
+    const driver = await Driver.findById(driverId)
+      .populate({
+        path: "userId",
+        select: excludedFields,
+      })
+      .select(excludedFields);
     if (!driver) {
       throw customError(404, "Driver not found");
     }
+
     return driver;
   } catch (error) {
     console.log("Error getting driver details: " + error.message);
