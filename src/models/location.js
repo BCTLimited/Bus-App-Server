@@ -13,6 +13,10 @@ const LocationSchema = new Schema(
       type: String,
       required: true,
     },
+    state: {
+      type: String,
+      required: true,
+    },
     pickUp: {
       type: Boolean,
       required: true,
