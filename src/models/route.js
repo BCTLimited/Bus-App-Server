@@ -97,6 +97,17 @@ const RouteSchema = new Schema(
             type: String,
             required: true,
           },
+          pickUp: {
+            type: String,
+            required: true,
+          },
+          destination: {
+            type: String,
+            required: true,
+          },
+          seatNumber: {
+            type: [Number],
+          },
         },
       ],
     },

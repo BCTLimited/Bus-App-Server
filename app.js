@@ -13,14 +13,16 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
+import { auth, isAdmin } from "./src/middlewares/auth.js";
+import rateLimitMiddleware from "./src/middlewares/rateLimitMiddleware.js";
+
 // Routes
 import authRouter from "./src/routes/auth.js";
 import busRouter from "./src/routes/bus.js";
 import tripRouter from "./src/routes/trip.js";
 import driverRouter from "./src/routes/driver.js";
 import routeRouter from "./src/routes/route.js";
-import { auth, isAdmin } from "./src/middlewares/auth.js";
-import rateLimitMiddleware from "./src/middlewares/rateLimitMiddleware.js";
+import locationRouter from "./src/routes/location.js";
 
 app.use(cors());
 app.use(helmet());
@@ -43,10 +45,13 @@ app.use(rateLimitMiddleware);
 app.use("/api/auth", authRouter);
 app.use("/api/trip", auth, tripRouter);
 
+// **
+app.use("/api/route", auth, routeRouter);
+app.use("/api/location", auth, locationRouter);
+
 // Admin routes
 app.use("/api/driver", auth, isAdmin, driverRouter);
 app.use("/api/bus", auth, isAdmin, busRouter);
-app.use("/api/route", auth, routeRouter);
 
 app.use(notFound);
 app.use(errorMiddleware);
