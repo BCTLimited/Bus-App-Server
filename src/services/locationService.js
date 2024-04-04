@@ -10,7 +10,7 @@ async function getLocations() {
 }
 
 async function addLocation(locationDetails) {
-  const requiredFields = ["name", "LGA", "state", "pickUp"];
+  const requiredFields = ["name", "LGA", "state", "pickUp", "dropOff"];
   const missingField = requiredFields.find(
     (field) => !(field in locationDetails)
   );

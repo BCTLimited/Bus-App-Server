@@ -21,6 +21,10 @@ const LocationSchema = new Schema(
       type: Boolean,
       required: true,
     },
+    dropOff: {
+      type: Boolean,
+      required: true,
+    },
   },
   {
     timestamps: true,
