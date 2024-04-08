@@ -20,6 +20,7 @@ import rateLimitMiddleware from "./src/middlewares/rateLimitMiddleware.js";
 import authRouter from "./src/routes/auth.js";
 import busRouter from "./src/routes/bus.js";
 import tripRouter from "./src/routes/trip.js";
+import ratingRouter from "./src/routes/rating.js";
 import driverRouter from "./src/routes/driver.js";
 import routeRouter from "./src/routes/route.js";
 import locationRouter from "./src/routes/location.js";
@@ -44,6 +45,7 @@ app.use(rateLimitMiddleware);
 // General Routes
 app.use("/api/auth", authRouter);
 app.use("/api/trip", auth, tripRouter);
+app.use("/api/rating", auth, ratingRouter);
 
 // **
 app.use("/api/route", auth, routeRouter);

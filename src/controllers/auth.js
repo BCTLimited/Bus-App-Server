@@ -93,11 +93,7 @@ const sendOTP = asyncWrapper(async (req, res, next) => {
     return res.status(200).json({ message: "User Already Verified" });
   }
 
-  const otpBody = await OTP.findOne({ email });
-
-  if (otpBody) {
-    await otpBody.deleteOne();
-  }
+  const otpBody = await OTP.findOneAndDelete({ email });
 
   const otp = generateOTP();
 

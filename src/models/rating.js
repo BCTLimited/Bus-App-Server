@@ -4,18 +4,22 @@ const { Schema } = mongoose;
 
 const RatingSchema = new Schema(
   {
-    driver: {
+    routeId: {
       type: Schema.Types.ObjectId,
-      ref: "Driver",
+      ref: "Route",
       required: true,
     },
-    reviewer: {
+    reviewerId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    value: {
+    star: {
       type: Number,
+      required: true,
+    },
+    comment: {
+      type: String,
       required: true,
     },
   },
