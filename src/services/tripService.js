@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import Trip from "../../src/models/trip.js";
 import Route from "../models/route.js";
-import TripCode from "../models/tripCode.js";
 import customError from "../utils/customError.js";
 import generateUniqueCode from "../utils/generateUniqueCode.js";
 import validateMongoId from "../utils/validateMongoId.js";
@@ -39,10 +38,30 @@ async function bookTrip(userId, tripDetails) {
     userId
   );
 
+  const code = await generateUniqueCode();
+
   const trip = await Trip.create({
     bookedBy: userId,
+    code,
     ...tripDetails,
   });
+
+  await Route.findByIdAndUpdate(
+    tripDetails.routeId,
+    {
+      $push: {
+        passengers: {
+          passenger: userId,
+          code,
+          pickUp: tripDetails.pickUp,
+          destination: tripDetails.dropOff,
+          seatNumber: tripDetails.seatNumber,
+        },
+      },
+    },
+    { new: true }
+  );
+
   return trip;
 }
 
@@ -53,40 +72,40 @@ async function getAllTrips(userId) {
   });
   return trips;
 }
-
-async function generateTripCode(tripId) {
+async function getTrip(tripId) {
   if (!validateMongoId(tripId)) {
     throw customError(400, `${tripId} is not a valid ID`);
   }
+
   const trip = await Trip.findById(tripId);
 
   if (!trip) {
-    throw customError(404, `No Trip with ID: ${tripId}`);
+    throw customError(404, `Trip not found`);
   }
-  const code = await generateUniqueCode();
+  return trip;
+}
 
-  await Route.findByIdAndUpdate(
-    trip.routeId,
-    {
-      $push: {
-        passengers: {
-          passenger: trip.bookedBy,
-          code,
-          pickUp: trip.pickUp,
-          destination: trip.dropOff,
-          seatNumber: trip.seatNumber,
-        },
-      },
-    },
+async function updateTrip(tripId, updatedDetails) {
+  if (!validateMongoId(tripId)) {
+    throw customError(400, `${tripId} is not a valid ID`);
+  }
+
+  console.log(updatedDetails);
+  const { paymentStatus } = updatedDetails;
+
+  const trip = await Trip.findOneAndUpdate(
+    { _id: tripId },
+    { paymentStatus },
     { new: true }
   );
 
-  const tripCode = await TripCode.create({ code, tripId });
+  console.log(trip);
 
-  return tripCode;
+  if (!trip) {
+    throw customError(404, `Trip not found`);
+  }
+  return trip;
 }
-
-async function updateTrip(tripId, updatedDetails) {}
 
 async function updateSeatAvailability(routeId, seatNumbers, userId) {
   const session = await mongoose.startSession();
@@ -130,4 +149,4 @@ async function updateSeatAvailability(routeId, seatNumbers, userId) {
   }
 }
 
-export default { bookTrip, getAllTrips, generateTripCode };
+export default { bookTrip, getAllTrips, getTrip, updateTrip };

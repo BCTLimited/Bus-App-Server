@@ -23,7 +23,7 @@ const RouteSchema = new Schema(
       required: [true, "Please Provide a Departure Time"],
     },
     departureDate: {
-      type: String,
+      type: Date,
       required: [true, "Please Provide a Departure Date"],
     },
     status: {

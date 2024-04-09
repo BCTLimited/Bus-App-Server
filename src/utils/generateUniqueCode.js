@@ -1,4 +1,4 @@
-import TripCode from "../models/tripCode.js";
+import Trip from "../models/trip.js";
 
 function generateRandomString(length) {
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -23,17 +23,15 @@ async function isCodeUnique(code) {
   // You may use a database query to check if the code exists
   // For example, you can use Mongoose to query your MongoDB database
   // Return true if the code is unique, false otherwise
-  const busCode = await TripCode.find({ code });
+  const busCode = await Trip.findOne({ code });
   if (!busCode) {
-    return true;
+    return false;
   }
-  false;
+  true;
 }
 
 async function generateUniqueCode() {
   let code = generateCode();
-
-  console.log(code);
 
   while (await isCodeUnique(code)) {
     code = generateCode();

@@ -34,6 +34,10 @@ const TripSchema = new Schema(
       type: [Number],
       required: true,
     },
+    code: {
+      type: String,
+      required: true,
+    },
     bookedBy: {
       type: Schema.Types.ObjectId,
       ref: "User",

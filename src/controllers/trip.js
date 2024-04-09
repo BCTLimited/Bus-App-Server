@@ -13,11 +13,16 @@ const getAllTrips = asyncWrapper(async (req, res, next) => {
   res.status(200).json({ trips });
 });
 
-const getTripCode = asyncWrapper(async (req, res, next) => {
-  const { userId } = req.user;
-  const { id } = req.params;
-  const result = await TripService.generateTripCode(id, userId);
-  res.status(200).json(result);
+const getSingleTrip = asyncWrapper(async (req, res, next) => {
+  const { tripId } = req.params;
+  const trip = await TripService.getTrip(tripId);
+  res.status(200).json({ trip });
 });
 
-export { bookTrip, getTripCode, getAllTrips };
+const updateTrip = asyncWrapper(async (req, res, next) => {
+  const { tripId } = req.params;
+  const trip = await TripService.updateTrip(tripId, req.body);
+  res.status(200).json({ message: "Trip Updated!", trip });
+});
+
+export { bookTrip, getAllTrips, getSingleTrip, updateTrip };

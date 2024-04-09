@@ -1,7 +1,12 @@
 import express from "express";
 import methodNotAllowed from "../utils/methodNotAllowed.js";
-import { auth } from "../middlewares/auth.js";
-import { bookTrip, getAllTrips, getTripCode } from "../controllers/trip.js";
+import { auth, isAdmin } from "../middlewares/auth.js";
+import {
+  bookTrip,
+  getAllTrips,
+  getSingleTrip,
+  updateTrip,
+} from "../controllers/trip.js";
 
 const router = express.Router();
 
@@ -10,7 +15,10 @@ router
   .get(auth, getAllTrips)
   .post(auth, bookTrip)
   .all(methodNotAllowed);
-// router.route("/:id").get().patch().all(methodNotAllowed);
-router.route("/:id/code").get(auth, getTripCode).all(methodNotAllowed);
+router
+  .route("/:tripId")
+  .get(getSingleTrip)
+  .patch(isAdmin, updateTrip)
+  .all(methodNotAllowed);
 
 export default router;

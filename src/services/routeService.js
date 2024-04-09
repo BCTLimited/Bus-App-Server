@@ -4,6 +4,7 @@ import customError from "../utils/customError.js";
 import validateMongoId from "../utils/validateMongoId.js";
 import busService from "./busService.js";
 import driverService from "./driverService.js";
+import dateUtility from "../utils/dateUtility.js";
 
 const excludedFields = [
   "-__v",
@@ -23,7 +24,17 @@ async function getAvailableRoutes(pickUp, dropOff) {
     conditions.pickUp = pickUp;
     conditions.dropOff = dropOff;
   }
+  const currentDate = new Date(new Date(dateUtility.getCurrentDate())); // Get the current date
+  const nextDay = new Date(new Date(dateUtility.getCurrentDate(24))); // Get the current date plus 24 hours
+
   try {
+    // const routes = await Route.find({
+    //   $and: [
+    //     { departureDate: { $gte: currentDate } }, // Departure time should be greater than or equal to current date
+    //     { departureDate: { $lt: nextDay } }, // Departure time should be less than next day's date
+    //   ],
+    //   ...conditions,
+    // })
     const routes = await Route.find(conditions)
       .select(excludedFields)
       .populate({
@@ -73,7 +84,10 @@ async function addNewRoute(routeDetails) {
     await busService.getBusDetails(routeDetails.busId);
     await driverService.getDriverDetails(routeDetails.driverId);
 
-    const route = await Route.create(routeDetails);
+    const route = await Route.create({
+      ...routeDetails,
+      departureDate: dateUtility.getCurrentDate(),
+    });
     return route;
   } catch (error) {
     console.log("Error adding new route: " + error.message);
