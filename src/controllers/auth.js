@@ -3,7 +3,7 @@ import customError from "../utils/customError.js";
 import userService from "../services/userService.js";
 import OTP from "../models/otp.js";
 import generateOTP from "../utils/generateOTP.js";
-import sendOTPByEmail from "../utils/sendOTPByEmail.js";
+import sendOTPByEmail from "../utils/emailUtils.js";
 import generateToken from "../config/generateToken.js";
 import asyncWrapper from "../middlewares/asyncWrapper.js";
 

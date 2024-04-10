@@ -4,7 +4,7 @@ import customError from "../utils/customError.js";
 import validateMongoId from "../utils/validateMongoId.js";
 import busService from "./busService.js";
 import driverService from "./driverService.js";
-import dateUtility from "../utils/dateUtility.js";
+import dateUtility from "../utils/dateUtils.js";
 
 const excludedFields = [
   "-__v",
