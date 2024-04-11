@@ -43,6 +43,14 @@ async function getAvailableRoutes(pickUp, dropOff) {
       })
       .populate({ path: "busId", select: excludedFields })
       .populate({
+        path: "passengers",
+        select: excludedFields,
+        populate: {
+          path: "passenger",
+          select: excludedFields,
+        },
+      })
+      .populate({
         path: "seats.occupiedBy",
         select: excludedFields,
       })
