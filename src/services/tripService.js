@@ -66,12 +66,19 @@ async function bookTrip(userId, tripDetails) {
 }
 
 async function getAllTrips(userId) {
-  const trips = await Trip.find({ bookedBy: userId }).populate({
-    path: "bookedBy",
-    select: excludedFields,
-  });
+  const trips = await Trip.find({ bookedBy: userId })
+    .populate({
+      path: "bookedBy",
+      select: excludedFields,
+    })
+    .populate({
+      path: "routeId",
+      select: [...excludedFields, "-route", "-seats", "-passengers"],
+    })
+    .select(excludedFields);
   return trips;
 }
+
 async function getTrip(tripId) {
   if (!validateMongoId(tripId)) {
     throw customError(400, `${tripId} is not a valid ID`);
