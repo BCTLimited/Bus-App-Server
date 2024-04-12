@@ -84,7 +84,16 @@ async function getTrip(tripId) {
     throw customError(400, `${tripId} is not a valid ID`);
   }
 
-  const trip = await Trip.findById(tripId);
+  const trip = await Trip.findById(tripId)
+    .populate({
+      path: "bookedBy",
+      select: excludedFields,
+    })
+    .populate({
+      path: "routeId",
+      select: [...excludedFields, "-route", "-seats", "-passengers"],
+    })
+    .select(excludedFields);
 
   if (!trip) {
     throw customError(404, `Trip not found`);
