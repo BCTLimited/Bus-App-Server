@@ -176,7 +176,7 @@ async function getRouteDetails(routeId) {
         },
       })
       .populate({
-        path: "seats.occupiedBy",
+        path: "seats",
         select: excludedFields,
       })
       .lean();
@@ -205,7 +205,7 @@ async function getDriverRoutes(userId) {
       })
       .populate({ path: "busId", select: excludedFields })
       .populate({
-        path: "seats.occupiedBy",
+        path: "seats",
         select: excludedFields,
         populate: {
           path: "userId",
