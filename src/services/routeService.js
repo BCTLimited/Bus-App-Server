@@ -205,6 +205,14 @@ async function getDriverRoutes(userId) {
       })
       .populate({ path: "busId", select: excludedFields })
       .populate({
+        path: "passengers",
+        select: excludedFields,
+        populate: {
+          path: "passenger",
+          select: excludedFields,
+        },
+      })
+      .populate({
         path: "seats",
         select: excludedFields,
         populate: {
