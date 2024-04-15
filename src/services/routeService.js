@@ -18,11 +18,15 @@ const excludedFields = [
   "-ratings",
 ];
 
-async function getAvailableRoutes(pickUp, dropOff) {
+async function getAvailableRoutes(pickUp, dropOff, status) {
   let conditions = {};
   if (pickUp && dropOff) {
     conditions.pickUp = pickUp;
     conditions.dropOff = dropOff;
+  }
+
+  if (status) {
+    conditions.status = status;
   }
   const currentDate = new Date(new Date(dateUtility.getCurrentDate())); // Get the current date
   const nextDay = new Date(new Date(dateUtility.getCurrentDate(24))); // Get the current date plus 24 hours

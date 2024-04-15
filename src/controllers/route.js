@@ -2,8 +2,8 @@ import asyncWrapper from "../middlewares/asyncWrapper.js";
 import RouteService from "../services/routeService.js";
 
 const getAvailableRoutes = asyncWrapper(async (req, res, next) => {
-  const { pickUp, dropOff } = req.query;
-  const routes = await RouteService.getAvailableRoutes(pickUp, dropOff);
+  const { pickUp, dropOff, status } = req.query;
+  const routes = await RouteService.getAvailableRoutes(pickUp, dropOff, status);
   res.status(200).json({ routes });
 });
 

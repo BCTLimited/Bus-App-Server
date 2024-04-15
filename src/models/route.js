@@ -29,9 +29,9 @@ const RouteSchema = new Schema(
     status: {
       type: String,
       enum: {
-        values: ["pending", "inProgress", "success", "cancelled"],
+        values: ["pending", "ongoing", "completed", "cancelled"],
         message:
-          "Status must be either 'pending', 'inProgress', 'success' or 'cancelled'",
+          "Status must be either 'pending', 'ongoing', 'completed' or 'cancelled'",
       },
       default: "pending",
     },
