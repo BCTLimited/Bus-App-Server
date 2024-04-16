@@ -54,6 +54,7 @@ app.use("/api/location", auth, locationRouter);
 // Admin routes
 app.use("/api/driver", auth, isAdmin, driverRouter);
 app.use("/api/bus", auth, isAdmin, busRouter);
+app.use("/api/rider", auth, isAdmin, busRouter);
 
 app.use(notFound);
 app.use(errorMiddleware);

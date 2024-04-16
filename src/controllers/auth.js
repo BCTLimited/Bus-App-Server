@@ -3,7 +3,7 @@ import customError from "../utils/customError.js";
 import userService from "../services/userService.js";
 import OTP from "../models/otp.js";
 import generateOTP from "../utils/generateOTP.js";
-import sendOTPByEmail from "../utils/emailUtils.js";
+import emailUtils from "../utils/emailUtils.js";
 import generateToken from "../config/generateToken.js";
 import asyncWrapper from "../middlewares/asyncWrapper.js";
 
@@ -12,7 +12,11 @@ const signUpUser = asyncWrapper(async (req, res, next) => {
   const { user } = await userService.registerUser(req.body);
   // Generate and send OTP
   const otp = generateOTP();
-  const emailInfo = await sendOTPByEmail(req.body.email, user.userName, otp);
+  const emailInfo = await emailUtils.sendOTPByEmail(
+    req.body.email,
+    user.userName,
+    otp
+  );
   await OTP.create({ email: req.body.email, otp });
   res.status(201).json({
     message: `OTP has been sent to ${emailInfo.envelope.to}`,
@@ -97,7 +101,7 @@ const sendOTP = asyncWrapper(async (req, res, next) => {
 
   const otp = generateOTP();
 
-  const emailInfo = await sendOTPByEmail(email, user.userName, otp);
+  const emailInfo = await emailUtils.sendOTPByEmail(email, user.userName, otp);
   await OTP.create({ email, otp });
 
   res.status(201).json({
@@ -134,7 +138,7 @@ const forgotPassword = asyncWrapper(async (req, res, next) => {
 
   const otp = generateOTP();
 
-  const emailInfo = await sendOTPByEmail(email, user.userName, otp);
+  const emailInfo = await emailUtils.sendOTPByEmail(email, user.userName, otp);
   await OTP.create({ email, otp });
 
   res.status(201).json({
