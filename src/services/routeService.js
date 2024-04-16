@@ -62,6 +62,7 @@ async function getAvailableRoutes(pickUp, dropOff, status) {
         path: "seats.occupiedBy",
         select: excludedFields,
       })
+      .sort({ createdAt: -1 })
       .lean();
 
     return routes;
@@ -102,7 +103,12 @@ async function addNewRoute(routeDetails) {
 
     const route = await Route.create({
       ...routeDetails,
-      departureDate: dateUtility.getCurrentDate(),
+      // departureDate: dateUtility.getCurrentDate(),
+    });
+
+    //Adds the route/trip to the driver's trips
+    await driverService.updateDriver(routeDetails.driverId, {
+      trips: route._id,
     });
     return route;
   } catch (error) {

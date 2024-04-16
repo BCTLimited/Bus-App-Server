@@ -28,6 +28,9 @@ const DriverSchema = new Schema(
         ref: "Rating",
       },
     ],
+    trips: {
+      type: [{ type: Schema.Types.ObjectId, ref: "Route" }],
+    },
   },
   {
     timestamps: true,

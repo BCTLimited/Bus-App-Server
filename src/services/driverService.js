@@ -10,9 +10,6 @@ const excludedFields = [
   "-role",
   "-homeLocation",
   "-isVerified",
-  "-trips",
-  "-createdAt",
-  "-updatedAt",
 ];
 
 async function getAllDrivers() {
@@ -21,6 +18,10 @@ async function getAllDrivers() {
       .populate({
         path: "userId",
         select: excludedFields,
+      })
+      .populate({
+        path: "trips",
+        select: [...excludedFields, "-route", "-passengers", "-seats"],
       })
       .select(excludedFields);
     return drivers;
