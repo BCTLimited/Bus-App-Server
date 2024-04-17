@@ -193,6 +193,10 @@ async function getRouteDetails(routeId) {
         path: "seats",
         select: excludedFields,
       })
+      .populate({
+        path: "busId",
+        select: excludedFields,
+      })
       .lean();
     if (!route) {
       throw customError(404, "Route not found");
