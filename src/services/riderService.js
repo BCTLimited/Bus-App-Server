@@ -4,8 +4,6 @@ import validateMongoId from "../utils/validateMongoId.js";
 
 const excludedFields = [
   "-__v",
-  "-createdAt",
-  "-updatedAt",
   "-password",
   "-role",
   "-isVerified",

@@ -8,8 +8,6 @@ import dateUtility from "../utils/dateUtils.js";
 
 const excludedFields = [
   "-__v",
-  "-createdAt",
-  "-updatedAt",
   "-isVerified",
   "-homeLocation",
   "-phoneNumber",
