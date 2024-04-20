@@ -2,8 +2,13 @@ import asyncWrapper from "../middlewares/asyncWrapper.js";
 import DriverService from "../services/driverService.js";
 
 const getAllDrivers = asyncWrapper(async (req, res) => {
-  const drivers = await DriverService.getAllDrivers();
-  res.status(200).json({ drivers });
+  let { search, page, perPage } = req.query;
+  const { drivers, count } = await DriverService.getAllDrivers({
+    search,
+    page,
+    perPage,
+  });
+  res.status(200).json({ drivers, count });
 });
 
 const addNewDriver = asyncWrapper(async (req, res) => {

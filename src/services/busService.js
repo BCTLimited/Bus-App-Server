@@ -4,10 +4,21 @@ import validateMongoId from "../utils/validateMongoId.js";
 
 const excludedFields = ["-__v", "-createdAt", "-updatedAt"];
 
-async function getAvailableBuses() {
+async function getAvailableBuses({ page }) {
+  let perPage = 5;
+  const skip = page ? (parseInt(page) - 1) * perPage : 0;
+
   try {
-    const buses = await Bus.find().select(excludedFields);
-    return buses;
+    const count = await Bus.countDocuments();
+    let query = Bus.find().select(excludedFields);
+
+    if (page) {
+      query = query.skip(skip).limit(perPage);
+    }
+
+    let buses = await query;
+
+    return { buses, count };
   } catch (error) {
     console.log("Error getting available buses: " + error.message);
     throw error;

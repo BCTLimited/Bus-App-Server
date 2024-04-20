@@ -18,7 +18,18 @@ const excludedFields = [
   "-ratings",
 ];
 
-async function getAvailableRoutes(pickUp, dropOff, status) {
+async function getAvailableRoutes({
+  pickUp,
+  dropOff,
+  status,
+  page,
+  perPage,
+  search,
+}) {
+  perPage = perPage ? parseInt(perPage) : 5;
+  const skip = page ? (parseInt(page) - 1) * perPage : 0;
+  let count = 0;
+
   let conditions = {};
   if (pickUp && dropOff) {
     conditions.pickUp = pickUp;
@@ -28,10 +39,36 @@ async function getAvailableRoutes(pickUp, dropOff, status) {
   if (status) {
     conditions.status = status;
   }
+
+  if (search) {
+    conditions.$or = [
+      { pickUp: { $regex: search, $options: "i" } },
+      { dropOff: { $regex: search, $options: "i" } },
+    ];
+  }
+
   const currentDate = new Date(new Date(dateUtility.getCurrentDate())); // Get the current date
   const nextDay = new Date(new Date(dateUtility.getCurrentDate(24))); // Get the current date plus 24 hours
 
   try {
+    // Gets Total Count
+    count = await Route.countDocuments();
+
+    // Get counts for different status
+    let counts = await Promise.all([
+      Route.countDocuments({ status: "pending" }),
+      Route.countDocuments({ status: "completed" }),
+      Route.countDocuments({ status: "ongoing" }),
+      Route.countDocuments({ status: "cancelled" }),
+    ]);
+
+    counts = {
+      pending: counts[0],
+      completed: counts[1],
+      ongoing: counts[2],
+      cancelled: counts[3],
+    };
+
     // const routes = await Route.find({
     //   $and: [
     //     { departureDate: { $gte: currentDate } }, // Departure time should be greater than or equal to current date
@@ -39,7 +76,7 @@ async function getAvailableRoutes(pickUp, dropOff, status) {
     //   ],
     //   ...conditions,
     // })
-    const routes = await Route.find(conditions)
+    let query = Route.find(conditions)
       .select(excludedFields)
       .populate({
         path: "driverId",
@@ -63,9 +100,14 @@ async function getAvailableRoutes(pickUp, dropOff, status) {
         select: excludedFields,
       })
       .sort({ createdAt: -1 })
-      .lean();
 
-    return routes;
+    if (page) {
+      query = query.skip(skip).limit(perPage);
+    }
+
+    let routes = await query;
+
+    return { routes, count, counts };
   } catch (error) {
     console.log("Error getting available routes: " + error.message);
     throw error;

@@ -12,9 +12,16 @@ const excludedFields = [
   "-isVerified",
 ];
 
-async function getAllDrivers() {
+async function getAllDrivers({ search, page, perPage }) {
+  perPage = perPage ? parseInt(perPage) : 5;
+  const skip = page ? (parseInt(page) - 1) * perPage : 0;
+
+  // Initiliaze a new condition object
+  let conditions = {};
+
   try {
-    const drivers = await Driver.find()
+    let count = await Driver.countDocuments(conditions);
+    let query = Driver.find(conditions)
       .populate({
         path: "userId",
         select: excludedFields,
@@ -24,7 +31,23 @@ async function getAllDrivers() {
         select: [...excludedFields, "-route", "-passengers", "-seats"],
       })
       .select(excludedFields);
-    return drivers;
+
+    if (page) {
+      query = query.skip(skip).limit(perPage);
+    }
+
+    let drivers = await query;
+
+    if (search) {
+      const searchRegex = new RegExp(search, "i");
+      drivers = drivers.filter(
+        (driver) =>
+          driver.userId.userName.match(searchRegex) ||
+          driver.userId.lastName.match(searchRegex)
+      );
+    }
+
+    return { drivers, count };
   } catch (error) {
     console.log("Error getting available drivers: " + error.message);
     throw error;

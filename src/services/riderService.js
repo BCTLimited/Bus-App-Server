@@ -12,18 +12,41 @@ const excludedFields = [
   "-homeLocation",
 ];
 
-async function getAllRiders() {
+async function getAllRiders({ search, page, perPage }) {
+  page = page ? parseInt(page) : 1;
+  perPage = perPage ? parseInt(perPage) : 5;
+  const skip = (page - 1) * perPage;
+
+  // Initiliaze a new condition object
+  let conditions = {};
+
   try {
-    let riders = await UserProfile.find()
+    let count = await UserProfile.countDocuments(conditions);
+    let riders = await UserProfile.find(conditions)
       .populate({
         path: "userId",
         select: excludedFields,
         match: { role: "user" },
       })
-      .select(excludedFields);
+      .select(excludedFields)
+      .skip(skip)
+      .limit(perPage);
 
-    riders = riders.filter((rider) => rider.userId);
-    return riders;
+    const filteredRiders = riders.filter((rider) => rider.userId);
+    riders = filteredRiders;
+    count = filteredRiders.length;
+
+    if (search) {
+      const searchRegex = new RegExp(search, "i");
+      const filteredRiders = riders.filter(
+        (rider) =>
+          (rider.userId && rider.userId.userName.match(searchRegex)) ||
+          (rider.userId && rider.userId.lastName.match(searchRegex))
+        // Add more search criteria if needed
+      );
+      riders = filteredRiders;
+    }
+    return { riders, count };
   } catch (error) {
     console.log("Error getting riders: " + error.message);
     throw error;
