@@ -11,28 +11,35 @@ const excludedFields = [
 ];
 
 async function getAllRiders({ search, page, perPage }) {
-  page = page ? parseInt(page) : 1;
-  perPage = perPage ? parseInt(perPage) : 5;
-  const skip = (page - 1) * perPage;
+  const itemsPerPage = perPage ? parseInt(perPage) : 5;
+  const skip = page ? (parseInt(page) - 1) * itemsPerPage : 0;
 
+  let pages = 0;
   // Initiliaze a new condition object
   let conditions = {};
 
   try {
     let count = await UserProfile.countDocuments(conditions);
-    let riders = await UserProfile.find(conditions)
+    let query = UserProfile.find(conditions)
       .populate({
         path: "userId",
         select: excludedFields,
         match: { role: "user" },
       })
       .select(excludedFields)
-      .skip(skip)
-      .limit(perPage);
+      .sort({ createdAt: -1 });
+
+    if (page) {
+      query = query.skip(skip).limit(itemsPerPage);
+    }
+
+    let riders = await query;
 
     const filteredRiders = riders.filter((rider) => rider.userId);
     riders = filteredRiders;
     count = filteredRiders.length;
+
+    pages = Math.ceil(filteredRiders.length / itemsPerPage);
 
     if (search) {
       const searchRegex = new RegExp(search, "i");
@@ -40,11 +47,13 @@ async function getAllRiders({ search, page, perPage }) {
         (rider) =>
           (rider.userId && rider.userId.userName.match(searchRegex)) ||
           (rider.userId && rider.userId.lastName.match(searchRegex))
-        // Add more search criteria if needed
       );
+
+      const totalRecords = filteredRiders.length;
+      pages = Math.ceil(totalRecords / itemsPerPage);
       riders = filteredRiders;
     }
-    return { riders, count };
+    return { riders, count, pages };
   } catch (error) {
     console.log("Error getting riders: " + error.message);
     throw error;

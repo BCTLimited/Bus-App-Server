@@ -3,8 +3,8 @@ import BusService from "../services/busService.js";
 
 const getAvailableBuses = asyncWrapper(async (req, res, next) => {
   let { page } = req.query;
-  const { buses, count } = await BusService.getAvailableBuses({ page });
-  res.status(200).json({ buses, count });
+  const { buses, count, pages } = await BusService.getAvailableBuses({ page });
+  res.status(200).json({ buses, count, pages });
 });
 
 const addNewBus = asyncWrapper(async (req, res, next) => {

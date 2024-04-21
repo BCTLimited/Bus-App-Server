@@ -23,10 +23,12 @@ async function getAvailableRoutes({
   page,
   perPage,
   search,
+  startDate,
+  endDate,
 }) {
-  perPage = perPage ? parseInt(perPage) : 5;
-  const skip = page ? (parseInt(page) - 1) * perPage : 0;
-  let count = 0;
+  //
+  const itemsPerPage = perPage ? parseInt(perPage) : 5;
+  const skip = page ? (parseInt(page) - 1) * itemsPerPage : 0;
 
   let conditions = {};
   if (pickUp && dropOff) {
@@ -38,42 +40,26 @@ async function getAvailableRoutes({
     conditions.status = status;
   }
 
-  if (search) {
-    conditions.$or = [
-      { pickUp: { $regex: search, $options: "i" } },
-      { dropOff: { $regex: search, $options: "i" } },
+  // const currentDate = new Date(new Date(dateUtility.getCurrentDate())); // Get the current date
+  // const nextDay = new Date(new Date(dateUtility.getCurrentDate(24))); // Get the current date plus 24 hours
+
+  if (startDate && endDate) {
+    conditions.$and = [
+      { departureDate: { $gte: currentDate } }, // Departure time should be greater than or equal to current date
+      { departureDate: { $lt: nextDay } }, // Departure time should be less than next day's date
     ];
   }
 
-  const currentDate = new Date(new Date(dateUtility.getCurrentDate())); // Get the current date
-  const nextDay = new Date(new Date(dateUtility.getCurrentDate(24))); // Get the current date plus 24 hours
-
   try {
-    // Gets Total Count
-    count = await Route.countDocuments();
+    const count = await Route.countDocuments(conditions);
 
-    // Get counts for different status
-    let counts = await Promise.all([
-      Route.countDocuments({ status: "pending" }),
-      Route.countDocuments({ status: "completed" }),
-      Route.countDocuments({ status: "ongoing" }),
-      Route.countDocuments({ status: "cancelled" }),
-    ]);
+    if (search) {
+      conditions.$or = [
+        { pickUp: { $regex: search, $options: "i" } },
+        { dropOff: { $regex: search, $options: "i" } },
+      ];
+    }
 
-    counts = {
-      pending: counts[0],
-      completed: counts[1],
-      ongoing: counts[2],
-      cancelled: counts[3],
-    };
-
-    // const routes = await Route.find({
-    //   $and: [
-    //     { departureDate: { $gte: currentDate } }, // Departure time should be greater than or equal to current date
-    //     { departureDate: { $lt: nextDay } }, // Departure time should be less than next day's date
-    //   ],
-    //   ...conditions,
-    // })
     let query = Route.find(conditions)
       .select(excludedFields)
       .populate({
@@ -97,15 +83,36 @@ async function getAvailableRoutes({
         path: "seats.occupiedBy",
         select: excludedFields,
       })
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: -1 });
 
+    //Apply Pagination
+    let routes, counts;
+    let pages = 0;
     if (page) {
-      query = query.skip(skip).limit(perPage);
+      const totalRecords = await Route.countDocuments(conditions);
+      console.log(totalRecords);
+      pages = Math.ceil(totalRecords / itemsPerPage);
+      query = query.skip(skip).limit(itemsPerPage);
     }
 
-    let routes = await query;
+    routes = await query;
 
-    return { routes, count, counts };
+    // Get counts for different status
+    counts = await Promise.all([
+      Route.countDocuments({ status: "pending" }),
+      Route.countDocuments({ status: "completed" }),
+      Route.countDocuments({ status: "ongoing" }),
+      Route.countDocuments({ status: "cancelled" }),
+    ]);
+
+    counts = {
+      pending: counts[0],
+      completed: counts[1],
+      ongoing: counts[2],
+      cancelled: counts[3],
+    };
+
+    return { routes, count, counts, pages };
   } catch (error) {
     console.log("Error getting available routes: " + error.message);
     throw error;

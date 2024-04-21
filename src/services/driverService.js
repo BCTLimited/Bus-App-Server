@@ -13,12 +13,12 @@ const excludedFields = [
 ];
 
 async function getAllDrivers({ search, page, perPage }) {
-  perPage = perPage ? parseInt(perPage) : 5;
-  const skip = page ? (parseInt(page) - 1) * perPage : 0;
+  const itemsPerPage = perPage ? parseInt(perPage) : 5;
+  const skip = page ? (parseInt(page) - 1) * itemsPerPage : 0;
 
   // Initiliaze a new condition object
   let conditions = {};
-
+  let pages = 0;
   try {
     let count = await Driver.countDocuments(conditions);
     let query = Driver.find(conditions)
@@ -30,10 +30,11 @@ async function getAllDrivers({ search, page, perPage }) {
         path: "trips",
         select: [...excludedFields, "-route", "-passengers", "-seats"],
       })
-      .select(excludedFields);
+      .select(excludedFields)
+      .sort({ createdAt: -1 });
 
     if (page) {
-      query = query.skip(skip).limit(perPage);
+      query = query.skip(skip).limit(itemsPerPage);
     }
 
     let drivers = await query;
@@ -46,8 +47,9 @@ async function getAllDrivers({ search, page, perPage }) {
           driver.userId.lastName.match(searchRegex)
       );
     }
+    pages = Math.ceil(drivers.length / itemsPerPage);
 
-    return { drivers, count };
+    return { drivers, count, pages };
   } catch (error) {
     console.log("Error getting available drivers: " + error.message);
     throw error;

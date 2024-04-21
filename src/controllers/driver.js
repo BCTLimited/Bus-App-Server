@@ -3,12 +3,12 @@ import DriverService from "../services/driverService.js";
 
 const getAllDrivers = asyncWrapper(async (req, res) => {
   let { search, page, perPage } = req.query;
-  const { drivers, count } = await DriverService.getAllDrivers({
+  const { drivers, count, pages } = await DriverService.getAllDrivers({
     search,
     page,
     perPage,
   });
-  res.status(200).json({ drivers, count });
+  res.status(200).json({ drivers, count, pages });
 });
 
 const addNewDriver = asyncWrapper(async (req, res) => {
