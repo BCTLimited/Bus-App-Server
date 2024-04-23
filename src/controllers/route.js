@@ -2,9 +2,9 @@ import asyncWrapper from "../middlewares/asyncWrapper.js";
 import RouteService from "../services/routeService.js";
 
 const getAvailableRoutes = asyncWrapper(async (req, res, next) => {
-  const { routes, count, counts, pages } =
+  const { routes, count, counts, pagination } =
     await RouteService.getAvailableRoutes(req.query);
-  res.status(200).json({ routes, count, counts, pages });
+  res.status(200).json({ routes, count, counts, pagination });
 });
 
 const addNewRoute = asyncWrapper(async (req, res, next) => {

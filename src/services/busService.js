@@ -4,25 +4,41 @@ import validateMongoId from "../utils/validateMongoId.js";
 
 const excludedFields = ["-__v", "-createdAt", "-updatedAt"];
 
-async function getAvailableBuses({ page, perPage }) {
+async function getAvailableBuses({ search, page, perPage }) {
   const itemsPerPage = perPage ? parseInt(perPage) : 5;
   const skip = page ? (parseInt(page) - 1) * itemsPerPage : 0;
-  console.log((parseInt(page) - 1) * itemsPerPage);
 
-  let pages = 0;
+  let pagination = {
+    totalPages: 0,
+    totalCount: 0,
+  };
+
+  let conditions = {};
+
+  if (search) {
+    const searchRegex = new RegExp(search, "i");
+    conditions.$or = [
+      { busNumber: { $regex: searchRegex } },
+      { plateNumber: { $regex: searchRegex } },
+    ];
+  }
+
   try {
     const count = await Bus.countDocuments();
-    let query = Bus.find().select(excludedFields).sort({ createdAt: -1 });
+    let query = Bus.find(conditions)
+      .select(excludedFields)
+      .sort({ createdAt: -1 });
 
     if (page) {
+      const totalRecords = await Bus.countDocuments(conditions);
       query = query.skip(skip).limit(itemsPerPage);
+      pagination.totalCount = totalRecords;
+      pagination.totalPages = Math.ceil(totalRecords / itemsPerPage);
     }
 
     let buses = await query;
 
-    pages = Math.ceil(count / itemsPerPage);
-
-    return { buses, count, pages };
+    return { buses, count, pagination };
   } catch (error) {
     console.log("Error getting available buses: " + error.message);
     throw error;

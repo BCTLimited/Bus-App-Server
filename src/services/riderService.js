@@ -62,6 +62,11 @@ async function getAllRiders({ search, page, perPage }) {
     },
   });
 
+  // Sort by createdAt
+  pipeline.push({
+    $sort: { createdAt: -1 }, // Sort in descending order
+  });
+
   // Count pipeline
   const countPipeline = [...pipeline]; // Copy the pipeline
   countPipeline.push({

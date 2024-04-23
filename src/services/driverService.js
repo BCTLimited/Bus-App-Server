@@ -16,10 +16,6 @@ async function getAllDrivers({ search, page, perPage }) {
   const itemsPerPage = perPage ? parseInt(perPage) : 5;
   const skip = page ? (parseInt(page) - 1) * itemsPerPage : 0;
 
-  // Initiliaze a new condition object
-  let conditions = {};
-
-  let pages = 0;
   let count = 0;
 
   let pagination = {
@@ -62,6 +58,11 @@ async function getAllDrivers({ search, page, perPage }) {
     },
   });
 
+  // Sort by createdAt
+  pipeline.push({
+    $sort: { createdAt: -1 }, // Sort in descending order
+  });
+
   // Count pipeline
   const countPipeline = [...pipeline]; // Copy the pipeline
   countPipeline.push({
@@ -92,47 +93,23 @@ async function getAllDrivers({ search, page, perPage }) {
         $count: "count",
       });
 
-      const totalRecords = await Driver.aggregate(paginationCountPipeline);
-      const totalCount = totalRecords[0]?.count ? totalRecords[0].count : 0;
-      console.log(totalCount);
-      pagination.totalCount = totalCount;
+      const totalRecordsResult = await Driver.aggregate(
+        paginationCountPipeline
+      );
+      const totalRecords = totalRecordsResult[0]?.count
+        ? totalRecordsResult[0].count
+        : 0;
+      console.log(totalRecords);
+      pagination.totalCount = totalRecords;
       pipeline.push({ $skip: skip });
       pipeline.push({ $limit: itemsPerPage });
-      pagination.totalPages = Math.ceil(totalCount / itemsPerPage);
+      const totalPages = Math.ceil(totalRecords / itemsPerPage);
+      pagination.totalPages = totalPages;
     }
 
     let drivers = await Driver.aggregate(pipeline);
 
     return { drivers, count, pagination };
-
-    // let count = await Driver.countDocuments(conditions);
-    // let query = Driver.find(conditions)
-    //   .populate({
-    //     path: "userId",
-    //     select: excludedFields,
-    //   })
-    //   .populate({
-    //     path: "trips",
-    //     select: [...excludedFields, "-route", "-passengers", "-seats"],
-    //   })
-    //   .select(excludedFields)
-    //   .sort({ createdAt: -1 });
-
-    // if (page) {
-    //   query = query.skip(skip).limit(itemsPerPage);
-    // }
-
-    // let drivers = await query;
-
-    // if (search) {
-    //   const searchRegex = new RegExp(search, "i");
-    //   drivers = drivers.filter(
-    //     (driver) =>
-    //       driver.userId.userName.match(searchRegex) ||
-    //       driver.userId.lastName.match(searchRegex)
-    //   );
-    // }
-    // pages = Math.ceil(drivers.length / itemsPerPage);
   } catch (error) {
     console.log("Error getting available drivers: " + error.message);
     throw error;

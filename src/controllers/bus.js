@@ -2,9 +2,14 @@ import asyncWrapper from "../middlewares/asyncWrapper.js";
 import BusService from "../services/busService.js";
 
 const getAvailableBuses = asyncWrapper(async (req, res, next) => {
-  let { page } = req.query;
-  const { buses, count, pages } = await BusService.getAvailableBuses({ page });
-  res.status(200).json({ buses, count, pages });
+  let { search, page, perPage } = req.query;
+  const { buses, count, pages, pagination } =
+    await BusService.getAvailableBuses({
+      search,
+      page,
+      perPage,
+    });
+  res.status(200).json({ buses, count, pages, pagination });
 });
 
 const addNewBus = asyncWrapper(async (req, res, next) => {

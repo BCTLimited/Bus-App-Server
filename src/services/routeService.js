@@ -16,21 +16,27 @@ const excludedFields = [
   "-ratings",
 ];
 
-async function getAvailableRoutes({
-  pickUp,
-  dropOff,
-  status,
-  page,
-  perPage,
-  search,
-  startDate,
-  endDate,
-}) {
+async function getAvailableRoutes(query) {
+  const { pickUp, dropOff, status, page, perPage, search, startDate, endDate } =
+    query;
+
   //
   const itemsPerPage = perPage ? parseInt(perPage) : 5;
   const skip = page ? (parseInt(page) - 1) * itemsPerPage : 0;
 
   let conditions = {};
+  let pages = 0;
+  let counts = {
+    pending: 0,
+    completed: 0,
+    ongoing: 0,
+    cancelled: 0,
+  };
+  let pagination = {
+    totalPages: 0,
+    totalCount: 0,
+  };
+
   if (pickUp && dropOff) {
     conditions.pickUp = pickUp;
     conditions.dropOff = dropOff;
@@ -45,8 +51,8 @@ async function getAvailableRoutes({
 
   if (startDate && endDate) {
     conditions.$and = [
-      { departureDate: { $gte: currentDate } }, // Departure time should be greater than or equal to current date
-      { departureDate: { $lt: nextDay } }, // Departure time should be less than next day's date
+      { departureDate: { $gte: startDate } }, // Departure time should be greater than or equal to current date
+      { departureDate: { $lt: endDate } }, // Departure time should be less than next day's date
     ];
   }
 
@@ -86,12 +92,11 @@ async function getAvailableRoutes({
       .sort({ createdAt: -1 });
 
     //Apply Pagination
-    let routes, counts;
-    let pages = 0;
+    let routes;
     if (page) {
       const totalRecords = await Route.countDocuments(conditions);
-      console.log(totalRecords);
-      pages = Math.ceil(totalRecords / itemsPerPage);
+      pagination.totalCount = totalRecords;
+      pagination.totalPages = Math.ceil(totalRecords / itemsPerPage);
       query = query.skip(skip).limit(itemsPerPage);
     }
 
@@ -112,7 +117,7 @@ async function getAvailableRoutes({
       cancelled: counts[3],
     };
 
-    return { routes, count, counts, pages };
+    return { routes, count, counts, pagination };
   } catch (error) {
     console.log("Error getting available routes: " + error.message);
     throw error;

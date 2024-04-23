@@ -45,25 +45,6 @@ const RouteSchema = new Schema(
       ref: "Bus",
       required: [true, "Please provide a Bus"],
     },
-    route: {
-      type: [
-        {
-          locationName: {
-            type: String,
-            required: true,
-          },
-          lat: {
-            type: Number,
-            required: true,
-          },
-          lng: {
-            type: Number,
-            required: true,
-          },
-        },
-      ],
-      required: true,
-    },
     seats: {
       type: [
         {
