@@ -1,11 +1,12 @@
 import UserProfile from "../models/userProfile.js";
+import User from "../models/user.js";
 import customError from "../utils/customError.js";
 import validateMongoId from "../utils/validateMongoId.js";
 
 const excludedFields = [
   "-__v",
   "-password",
-  "-role",
+  // "-role",
   "-isVerified",
   "-homeLocation",
 ];
@@ -14,46 +15,94 @@ async function getAllRiders({ search, page, perPage }) {
   const itemsPerPage = perPage ? parseInt(perPage) : 5;
   const skip = page ? (parseInt(page) - 1) * itemsPerPage : 0;
 
-  let pages = 0;
-  // Initiliaze a new condition object
-  let conditions = {};
+  let count = 0;
+  let pagination = {
+    totalPages: 0,
+    totalCount: 0,
+  };
+  const pipeline = [];
+
+  //
+  pipeline.push({
+    $lookup: {
+      from: "users",
+      let: { userId: "$userId" },
+      localField: "userId",
+      foreignField: "_id",
+      as: "user",
+      pipeline: [
+        {
+          $project: {
+            createdAt: 0,
+          },
+        },
+      ],
+    },
+  });
+
+  // Filters out admins and drivers
+  pipeline.push({
+    $match: {
+      "user.role": "user",
+    },
+  });
+
+  // Renames user to userId
+  pipeline.push({
+    $addFields: {
+      userId: { $arrayElemAt: ["$user", 0] },
+    },
+  });
+
+  // Excludes Fields
+  pipeline.push({
+    $project: {
+      updatedAt: 0,
+      user: 0,
+    },
+  });
+
+  // Count pipeline
+  const countPipeline = [...pipeline]; // Copy the pipeline
+  countPipeline.push({
+    $count: "count",
+  });
+
+  // Search
+  if (search) {
+    const searchRegex = new RegExp(search, "i");
+    pipeline.push({
+      $match: {
+        $or: [
+          { "userId.userName": { $regex: searchRegex } },
+          { "userId.lastName": { $regex: searchRegex } },
+        ],
+      },
+    });
+  }
 
   try {
-    let count = await UserProfile.countDocuments(conditions);
-    let query = UserProfile.find(conditions)
-      .populate({
-        path: "userId",
-        select: excludedFields,
-        match: { role: "user" },
-      })
-      .select(excludedFields)
-      .sort({ createdAt: -1 });
+    const countResult = await UserProfile.aggregate(countPipeline);
+    count = countResult.length > 0 ? countResult[0]?.count : 0;
 
+    // Pagination
     if (page) {
-      query = query.skip(skip).limit(itemsPerPage);
+      const paginationCountPipeline = [...pipeline];
+      paginationCountPipeline.push({
+        $count: "count",
+      });
+
+      const totalRecords = await UserProfile.aggregate(paginationCountPipeline);
+      const totalCount = totalRecords[0]?.count ? totalRecords[0].count : 0;
+      pagination.totalCount = totalCount;
+      pipeline.push({ $skip: skip });
+      pipeline.push({ $limit: itemsPerPage });
+      pagination.totalPages = Math.ceil(totalCount / itemsPerPage);
     }
 
-    let riders = await query;
+    let riders = await UserProfile.aggregate(pipeline);
 
-    const filteredRiders = riders.filter((rider) => rider.userId);
-    riders = filteredRiders;
-    count = filteredRiders.length;
-
-    pages = Math.ceil(filteredRiders.length / itemsPerPage);
-
-    if (search) {
-      const searchRegex = new RegExp(search, "i");
-      const filteredRiders = riders.filter(
-        (rider) =>
-          (rider.userId && rider.userId.userName.match(searchRegex)) ||
-          (rider.userId && rider.userId.lastName.match(searchRegex))
-      );
-
-      const totalRecords = filteredRiders.length;
-      pages = Math.ceil(totalRecords / itemsPerPage);
-      riders = filteredRiders;
-    }
-    return { riders, count, pages };
+    return { riders, count, pagination };
   } catch (error) {
     console.log("Error getting riders: " + error.message);
     throw error;

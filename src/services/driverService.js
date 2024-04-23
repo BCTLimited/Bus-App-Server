@@ -18,38 +18,121 @@ async function getAllDrivers({ search, page, perPage }) {
 
   // Initiliaze a new condition object
   let conditions = {};
+
   let pages = 0;
+  let count = 0;
+
+  let pagination = {
+    totalPages: 0,
+    totalCount: 0,
+  };
+
+  const pipeline = [];
+
+  //
+  pipeline.push({
+    $lookup: {
+      from: "users",
+      let: { userId: "$userId" },
+      localField: "userId",
+      foreignField: "_id",
+      as: "user",
+      pipeline: [
+        {
+          $project: {
+            createdAt: 0,
+          },
+        },
+      ],
+    },
+  });
+
+  // Renames user to userId
+  pipeline.push({
+    $addFields: {
+      userId: { $arrayElemAt: ["$user", 0] },
+    },
+  });
+
+  // Excludes Fields
+  pipeline.push({
+    $project: {
+      updatedAt: 0,
+      user: 0,
+    },
+  });
+
+  // Count pipeline
+  const countPipeline = [...pipeline]; // Copy the pipeline
+  countPipeline.push({
+    $count: "count",
+  });
+
+  // Search
+  if (search) {
+    const searchRegex = new RegExp(search, "i");
+    pipeline.push({
+      $match: {
+        $or: [
+          { "userId.userName": { $regex: searchRegex } },
+          { "userId.lastName": { $regex: searchRegex } },
+        ],
+      },
+    });
+  }
+
   try {
-    let count = await Driver.countDocuments(conditions);
-    let query = Driver.find(conditions)
-      .populate({
-        path: "userId",
-        select: excludedFields,
-      })
-      .populate({
-        path: "trips",
-        select: [...excludedFields, "-route", "-passengers", "-seats"],
-      })
-      .select(excludedFields)
-      .sort({ createdAt: -1 });
+    const countResult = await Driver.aggregate(countPipeline);
+    count = countResult.length > 0 ? countResult[0]?.count : 0;
 
+    // Pagination
     if (page) {
-      query = query.skip(skip).limit(itemsPerPage);
+      const paginationCountPipeline = [...pipeline];
+      paginationCountPipeline.push({
+        $count: "count",
+      });
+
+      const totalRecords = await Driver.aggregate(paginationCountPipeline);
+      const totalCount = totalRecords[0]?.count ? totalRecords[0].count : 0;
+      console.log(totalCount);
+      pagination.totalCount = totalCount;
+      pipeline.push({ $skip: skip });
+      pipeline.push({ $limit: itemsPerPage });
+      pagination.totalPages = Math.ceil(totalCount / itemsPerPage);
     }
 
-    let drivers = await query;
+    let drivers = await Driver.aggregate(pipeline);
 
-    if (search) {
-      const searchRegex = new RegExp(search, "i");
-      drivers = drivers.filter(
-        (driver) =>
-          driver.userId.userName.match(searchRegex) ||
-          driver.userId.lastName.match(searchRegex)
-      );
-    }
-    pages = Math.ceil(drivers.length / itemsPerPage);
+    return { drivers, count, pagination };
 
-    return { drivers, count, pages };
+    // let count = await Driver.countDocuments(conditions);
+    // let query = Driver.find(conditions)
+    //   .populate({
+    //     path: "userId",
+    //     select: excludedFields,
+    //   })
+    //   .populate({
+    //     path: "trips",
+    //     select: [...excludedFields, "-route", "-passengers", "-seats"],
+    //   })
+    //   .select(excludedFields)
+    //   .sort({ createdAt: -1 });
+
+    // if (page) {
+    //   query = query.skip(skip).limit(itemsPerPage);
+    // }
+
+    // let drivers = await query;
+
+    // if (search) {
+    //   const searchRegex = new RegExp(search, "i");
+    //   drivers = drivers.filter(
+    //     (driver) =>
+    //       driver.userId.userName.match(searchRegex) ||
+    //       driver.userId.lastName.match(searchRegex)
+    //   );
+    // }
+    // pages = Math.ceil(drivers.length / itemsPerPage);
   } catch (error) {
     console.log("Error getting available drivers: " + error.message);
     throw error;

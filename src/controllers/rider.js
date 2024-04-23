@@ -3,12 +3,12 @@ import riderService from "../services/riderService.js";
 
 const getAllRiders = asyncWrapper(async (req, res, next) => {
   let { search, page, perPage } = req.query;
-  const { riders, count, pages } = await riderService.getAllRiders({
+  const { riders, count, pages, pagination } = await riderService.getAllRiders({
     search,
     page,
     perPage,
   });
-  res.status(200).json({ riders, count, pages });
+  res.status(200).json({ riders, count, pages, pagination });
 });
 
 const getSingleRider = asyncWrapper(async (req, res, next) => {
