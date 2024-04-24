@@ -116,7 +116,7 @@ async function getAllDrivers({ search, page, perPage }) {
   }
 }
 
-async function addNewDriver(driverDetails) {
+async function addNewDriver(driverDetails, files) {
   const requiredFields = [
     "userName",
     "lastName",
@@ -127,16 +127,20 @@ async function addNewDriver(driverDetails) {
     "licenseExpiryDate",
     "age",
   ];
-
+  
   const missingField = requiredFields.find(
     (field) => !(field in driverDetails)
   );
+  
+  if (missingField) {
+    throw customError(400, `${missingField} is required!`);
+  }
+  
+  if (!files?.image) {
+    throw customError(400, "Image Required");
+  }
 
   try {
-    if (missingField) {
-      throw customError(400, `${missingField} is required!`);
-    }
-
     console.log(driverDetails);
     // Register a Driver and verify thier profile
     const { user, userProfile } = await userService.registerUser({
@@ -144,6 +148,12 @@ async function addNewDriver(driverDetails) {
       homeLocation: "Head Office",
       role: "driver",
     });
+
+    if (files.image) {
+      driverDetails.image = await uploadService.uploadUserImage(
+        files.image.tempFilePath
+      );
+    }
 
     userProfile.isVerified = true;
     await userProfile.save();

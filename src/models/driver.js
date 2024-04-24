@@ -14,6 +14,11 @@ const DriverSchema = new Schema(
       type: String,
       required: true,
     },
+    image: {
+      type: String,
+      default:
+        "https://res.cloudinary.com/demmgc49v/image/upload/v1695969739/default-avatar_scnpps.jpg",
+    },
     licenseExpiryDate: {
       type: String,
       required: true,

@@ -12,7 +12,7 @@ const getAllDrivers = asyncWrapper(async (req, res) => {
 });
 
 const addNewDriver = asyncWrapper(async (req, res) => {
-  const driver = await DriverService.addNewDriver(req.body);
+  const driver = await DriverService.addNewDriver(req.body, req.files);
   res.status(200).json({ message: "Driver Added", driver });
 });
 
