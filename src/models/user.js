@@ -34,7 +34,10 @@ const UserSchema = new Schema(
     phoneNumber: {
       type: String,
       required: [true, "Please provide a phone number"],
-      maxlength: [11, "Phone number cannot exceed 11 characters"],
+      match: [
+        /^(?:(?:\+|0{0,2})234)?[7-9]\d{9}$/,
+        "Please enter a valid Nigerian phone number",
+      ],
     },
     role: {
       type: String,
