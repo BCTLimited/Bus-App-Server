@@ -29,11 +29,12 @@ const UserSchema = new Schema(
     password: {
       type: String,
       required: [true, "Please provide a password"],
-      minLength: [3, "Password is too short"],
+      minlength: [8, "Password must be at least 8 characters long"],
     },
     phoneNumber: {
       type: String,
       required: [true, "Please provide a phone number"],
+      maxlength: [11, "Phone number cannot exceed 11 characters"],
     },
     role: {
       type: String,
@@ -52,7 +53,6 @@ UserSchema.pre("save", async function (next) {
   }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  console.log("password hashed");
   next();
 });
 
