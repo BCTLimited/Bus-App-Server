@@ -13,7 +13,8 @@ const errorMiddleware = (err, req, res, next) => {
         field === "username" ||
         field === "phoneNumber" ||
         field === "paymentType" ||
-        field === "status"
+        field === "status" ||
+        field === "password"
       ) {
         errorMessage = err.errors[field].message;
         statusCode = 400;
@@ -28,16 +29,24 @@ const errorMiddleware = (err, req, res, next) => {
     }
   }
 
+  console.log(err);
+
   // Handling MongoDB duplicate key error
-  if (err.code === 11000 && err.keyValue.email) {
-    errorMessage = "User with this email already exists";
-    statusCode = 400;
-  } else if (err.code === 11000 && err.keyValue.phoneNumber) {
-    errorMessage = "User with this phone number already exists";
+  if (err.code === 11000) {
+    const { email, phoneNumber, plateNumber } = err.keyValue;
+    if (email) {
+      errorMessage = "User with this email already exists";
+    }
+    if (phoneNumber) {
+      errorMessage = "User with this phone number already exists";
+    }
+    if (plateNumber) {
+      errorMessage = "Plate number already taken";
+    }
     statusCode = 400;
   }
 
-  console.error(err.message); // Logging the error for debugging
+  // console.error(err.message); // Logging the error for debugging
 
   res.status(statusCode).json({ message: errorMessage });
 };

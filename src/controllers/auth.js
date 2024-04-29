@@ -89,6 +89,41 @@ const updateUser = asyncWrapper(async (req, res, next) => {
   return res.status(200).json({ message: "Details Updated Successfully!" });
 });
 
+//DELETE USER
+const deleteUser = asyncWrapper(async (req, res, next) => {
+  const { userId } = req.user;
+
+  // Create a new Date object representing the current date and time
+  const currentDate = new Date();
+
+  // Get the date components
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth() + 1; // Months are zero-based, so add 1
+  const day = currentDate.getDate();
+
+  // Get the time components
+  const hours = currentDate.getHours();
+  const minutes = currentDate.getMinutes();
+  const seconds = currentDate.getSeconds();
+
+  // Format the date and time as strings
+  const formattedDate = `${year}-${month}-${day}`;
+  const formattedTime = `${hours}:${minutes}:${seconds}`;
+
+  const updatedUserInfo = {
+    status: "inactive",
+    phoneNumber: "00000000000",
+    email: `Anon${formattedDate + formattedTime}@gmail.com`,
+    userName: "Anonymous",
+    lastName: "Anonymous",
+  };
+
+  await userService.updateUserModel(userId, updatedUserInfo);
+
+  res.status(200).json({ message: "Account Deleted!" });
+});
+
+// SendOTP
 const sendOTP = asyncWrapper(async (req, res, next) => {
   const { email } = req.body;
   const user = await userService.findUserByEmail(email);
@@ -167,6 +202,7 @@ export {
   signUpUser,
   signInUser,
   getUser,
+  deleteUser,
   updateUser,
   sendOTP,
   verifyOTP,

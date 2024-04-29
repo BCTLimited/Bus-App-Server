@@ -8,6 +8,7 @@ import {
   verifyOTP,
   forgotPassword,
   resetPassword,
+  deleteUser,
 } from "../controllers/auth.js";
 
 import methodNotAllowed from "../utils/methodNotAllowed.js";
@@ -19,6 +20,7 @@ router
   .route("/")
   .get(auth, getUser)
   .patch(auth, updateUser)
+  .delete(auth, deleteUser)
   .all(methodNotAllowed);
 router.route("/signup").post(signUpUser).all(methodNotAllowed);
 router.route("/signin").post(signInUser).all(methodNotAllowed);

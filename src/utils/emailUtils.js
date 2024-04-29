@@ -15,7 +15,7 @@ const sendEmail = async ({ to, subject, text, html }) => {
   });
 
   const mailOptions = {
-    from: "Dev@gmail.com",
+    from: "Admin@SmoothShuttle.com",
     to: to,
     subject,
     text,
@@ -33,7 +33,7 @@ const generateEmail = (intro, name, otp) => {
     theme: "default",
     product: {
       // Appears in header & footer of e-mails
-      name: "Bus Booking App",
+      name: "Smooth Shuttle",
       link: "https://mailgen.js/",
       // Optional product logo
       // logo: 'https://mailgen.js/img/logo.png'
@@ -67,7 +67,7 @@ const generateEmail = (intro, name, otp) => {
 const sendOTPByEmail = async (email, userName, otp) => {
   const subject = "OTP Request";
   const intro =
-    "You received this email because you registered on Bus Booking App";
+    "You received this email because you registered on Smooth Shuttle";
   const { emailBody, emailText } = generateEmail(intro, userName, otp);
   return sendEmail({
     to: email,

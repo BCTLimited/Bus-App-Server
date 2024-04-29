@@ -8,11 +8,15 @@ const BusSchema = new Schema(
     plateNumber: {
       type: String,
       required: [true, "Please provide a plate number"],
-      unique: [true, "Plate number already taken"],
+      unique: true,
     },
     busNumber: {
       type: String,
       required: [true, "Please provide a bus number"],
+    },
+    modelName: {
+      type: String,
+      required: [true, "Please provide a model name"],
     },
   },
   {

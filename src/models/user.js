@@ -35,9 +35,10 @@ const UserSchema = new Schema(
       type: String,
       required: [true, "Please provide a phone number"],
       match: [
-        /^(?:(?:\+|0{0,2})234)?[7-9]\d{9}$/,
+        /^(0)(7|8|9){1}(0|1){1}[0-9]{8}$/,
         "Please enter a valid Nigerian phone number",
       ],
+      unique: true,
     },
     role: {
       type: String,
