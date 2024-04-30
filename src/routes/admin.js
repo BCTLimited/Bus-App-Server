@@ -11,6 +11,7 @@ import {
   getAllVehicles,
   getRider,
   getTrip,
+  getVehicle,
   updateDriver,
   updateTrip,
   updateVehicle,
@@ -43,6 +44,6 @@ router
   .post(createVehicle)
   .patch(updateVehicle)
   .all(methodNotAllowed);
-router.route("bus/:busId").get(getRider).all(methodNotAllowed);
+router.route("bus/:busId").get(getVehicle).all(methodNotAllowed);
 
 export default router;
