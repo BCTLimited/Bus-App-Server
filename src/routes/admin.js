@@ -9,6 +9,7 @@ import {
   getAllRiders,
   getAllTrips,
   getAllVehicles,
+  getDriver,
   getRider,
   getTrip,
   getVehicle,
@@ -36,7 +37,7 @@ router
   .post(createDriver)
   .patch(updateDriver)
   .all(methodNotAllowed);
-router.route("driver/:driverId").get(getRider).all(methodNotAllowed);
+router.route("driver/:driverId").get(getDriver).all(methodNotAllowed);
 
 router
   .route("/bus")
