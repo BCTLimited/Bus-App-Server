@@ -29,7 +29,7 @@ router
   .all(methodNotAllowed);
 
 router.route("/rider").get(getAllRiders).all(methodNotAllowed);
-router.route("rider/:riderId").get(getRider).all(methodNotAllowed);
+router.route("/rider/:riderId").get(getRider).all(methodNotAllowed);
 
 router
   .route("/driver")
@@ -37,7 +37,7 @@ router
   .post(createDriver)
   .patch(updateDriver)
   .all(methodNotAllowed);
-router.route("driver/:driverId").get(getDriver).all(methodNotAllowed);
+router.route("/driver/:driverId").get(getDriver).all(methodNotAllowed);
 
 router
   .route("/bus")
@@ -45,6 +45,6 @@ router
   .post(createVehicle)
   .patch(updateVehicle)
   .all(methodNotAllowed);
-router.route("bus/:busId").get(getVehicle).all(methodNotAllowed);
+router.route("/bus/:busId").get(getVehicle).all(methodNotAllowed);
 
 export default router;
