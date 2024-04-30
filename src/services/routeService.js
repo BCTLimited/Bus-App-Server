@@ -25,7 +25,6 @@ async function getAvailableRoutes(query) {
   const skip = page ? (parseInt(page) - 1) * itemsPerPage : 0;
 
   let conditions = {};
-  let pages = 0;
   let counts = {
     pending: 0,
     completed: 0,

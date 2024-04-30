@@ -1,5 +1,4 @@
 import UserProfile from "../models/userProfile.js";
-import User from "../models/user.js";
 import customError from "../utils/customError.js";
 import validateMongoId from "../utils/validateMongoId.js";
 
@@ -21,6 +20,7 @@ async function getAllRiders(query) {
     totalPages: 0,
     totalCount: 0,
   };
+  let monthlyStats = Array(12).fill(0);
   const pipeline = [];
 
   //
@@ -47,6 +47,32 @@ async function getAllRiders(query) {
       "user.role": "user",
     },
   });
+
+  // Monthly Stats
+  const monthlyPipeline = [
+    {
+      $group: {
+        _id: { $month: "$createdAt" }, // Group by month
+        count: { $sum: 1 }, // Count registrations in each month
+      },
+    },
+    {
+      $sort: { _id: 1 }, // Sort by month
+    },
+  ];
+
+  const monthlyCounts = await UserProfile.aggregate([
+    ...pipeline,
+    ...monthlyPipeline,
+  ]);
+
+  // Iterate over the monthly counts and update countsArray
+  monthlyCounts.map((month) => {
+    const monthIndex = month._id - 1; // Month index is 0-based
+    countsArray[monthIndex] = month.count;
+  });
+
+  monthlyStats = countsArray;
 
   // Renames user to userId
   pipeline.push({
@@ -108,7 +134,7 @@ async function getAllRiders(query) {
 
     let riders = await UserProfile.aggregate(pipeline);
 
-    return { riders, count, pagination };
+    return { riders, count, pagination, monthlyStats };
   } catch (error) {
     console.log("Error getting riders: " + error.message);
     throw error;

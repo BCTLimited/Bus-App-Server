@@ -36,10 +36,9 @@ const deleteTrip = asyncWrapper(async (req, res) => {
 
 // Riders
 const getAllRiders = asyncWrapper(async (req, res) => {
-  const { riders, count, pages, pagination } = await riderService.getAllRiders(
-    req.query
-  );
-  res.status(200).json({ riders, count, pages, pagination });
+  const { riders, count, pages, pagination, monthlyStats } =
+    await riderService.getAllRiders(req.query);
+  res.status(200).json({ riders, count, pages, pagination, monthlyStats });
 });
 
 const getRider = asyncWrapper(async (req, res) => {
