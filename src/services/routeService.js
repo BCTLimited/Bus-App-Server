@@ -193,6 +193,7 @@ async function deleteRoute(routeId) {
   if (!validateMongoId(routeId)) {
     throw customError(400, `${routeId} is not a valid ID`);
   }
+
   try {
     const route = await Route.findById(routeId);
 

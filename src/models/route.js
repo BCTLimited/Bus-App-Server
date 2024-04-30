@@ -35,6 +35,9 @@ const RouteSchema = new Schema(
       },
       default: "pending",
     },
+    cancelReason: {
+      type: String,
+    },
     driverId: {
       type: Schema.Types.ObjectId,
       ref: "Driver",

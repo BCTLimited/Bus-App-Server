@@ -4,7 +4,8 @@ import validateMongoId from "../utils/validateMongoId.js";
 
 const excludedFields = ["-__v", "-createdAt", "-updatedAt"];
 
-async function getAvailableBuses({ search, page, perPage }) {
+async function getAvailableBuses(query) {
+  const { search, page, perPage } = query;
   const itemsPerPage = perPage ? parseInt(perPage) : 5;
   const skip = page ? (parseInt(page) - 1) * itemsPerPage : 0;
 

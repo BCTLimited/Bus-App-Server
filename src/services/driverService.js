@@ -12,7 +12,8 @@ const excludedFields = [
   "-isVerified",
 ];
 
-async function getAllDrivers({ search, page, perPage }) {
+async function getAllDrivers(query) {
+  const { search, page, perPage } = query;
   const itemsPerPage = perPage ? parseInt(perPage) : 5;
   const skip = page ? (parseInt(page) - 1) * itemsPerPage : 0;
 
@@ -127,15 +128,15 @@ async function addNewDriver(driverDetails, files) {
     "licenseExpiryDate",
     "age",
   ];
-  
+
   const missingField = requiredFields.find(
     (field) => !(field in driverDetails)
   );
-  
+
   if (missingField) {
     throw customError(400, `${missingField} is required!`);
   }
-  
+
   if (!files?.image) {
     throw customError(400, "Image Required");
   }

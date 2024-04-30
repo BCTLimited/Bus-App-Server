@@ -25,6 +25,7 @@ import driverRouter from "./src/routes/driver.js";
 import routeRouter from "./src/routes/route.js";
 import locationRouter from "./src/routes/location.js";
 import riderRouter from "./src/routes/rider.js";
+import adminRouter from "./src/routes/admin.js";
 
 app.use(cors());
 app.use(helmet());
@@ -56,6 +57,7 @@ app.use("/api/location", auth, locationRouter);
 app.use("/api/driver", auth, isAdmin, driverRouter);
 app.use("/api/bus", auth, isAdmin, busRouter);
 app.use("/api/rider", auth, isAdmin, riderRouter);
+app.use("/api/admin", auth, isAdmin, adminRouter);
 
 app.use(notFound);
 app.use(errorMiddleware);

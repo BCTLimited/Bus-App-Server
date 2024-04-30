@@ -11,7 +11,8 @@ const excludedFields = [
   "-homeLocation",
 ];
 
-async function getAllRiders({ search, page, perPage }) {
+async function getAllRiders(query) {
+  const { search, page, perPage } = query;
   const itemsPerPage = perPage ? parseInt(perPage) : 5;
   const skip = page ? (parseInt(page) - 1) * itemsPerPage : 0;
 
