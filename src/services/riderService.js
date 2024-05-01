@@ -69,10 +69,8 @@ async function getAllRiders(query) {
   // Iterate over the monthly counts and update countsArray
   monthlyCounts.map((month) => {
     const monthIndex = month._id - 1; // Month index is 0-based
-    countsArray[monthIndex] = month.count;
+    monthlyStats[monthIndex] = month.count;
   });
-
-  monthlyStats = countsArray;
 
   // Renames user to userId
   pipeline.push({
