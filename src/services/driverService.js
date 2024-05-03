@@ -26,7 +26,7 @@ async function getAllDrivers(query) {
 
   const pipeline = [];
 
-  //
+  // populate userId
   pipeline.push({
     $lookup: {
       from: "users",
@@ -34,6 +34,23 @@ async function getAllDrivers(query) {
       localField: "userId",
       foreignField: "_id",
       as: "user",
+      pipeline: [
+        {
+          $project: {
+            createdAt: 0,
+          },
+        },
+      ],
+    },
+  });
+
+  // populate trips
+  pipeline.push({
+    $lookup: {
+      from: "routes",
+      localField: "trips",
+      foreignField: "_id",
+      as: "trips",
       pipeline: [
         {
           $project: {
