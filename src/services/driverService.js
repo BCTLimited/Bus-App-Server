@@ -44,22 +44,22 @@ async function getAllDrivers(query) {
     },
   });
 
-  // populate trips
-  pipeline.push({
-    $lookup: {
-      from: "routes",
-      localField: "trips",
-      foreignField: "_id",
-      as: "trips",
-      pipeline: [
-        {
-          $project: {
-            createdAt: 0,
-          },
-        },
-      ],
-    },
-  });
+  // // populate trips
+  // pipeline.push({
+  //   $lookup: {
+  //     from: "routes",
+  //     localField: "trips",
+  //     foreignField: "_id",
+  //     as: "trips",
+  //     pipeline: [
+  //       {
+  //         $project: {
+  //           createdAt: 0,
+  //         },
+  //       },
+  //     ],
+  //   },
+  // });
 
   // Renames user to userId
   pipeline.push({
@@ -232,13 +232,15 @@ async function updateDriver(driverId, updatedDetails) {
 }
 
 async function getDriverDetails(driverId) {
+
   if (!validateMongoId(driverId)) {
     throw customError(400, `${driverId} is not a valid ID`);
   }
+
   try {
     const driver = await Driver.findById(driverId)
       .populate({
-        path: "userId",
+        path: "userId trips",
         select: excludedFields,
       })
       .select(excludedFields);
