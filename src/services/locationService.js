@@ -7,7 +7,7 @@ const excludedFields = ["-__v", "-createdAt", "-updatedAt"];
 async function getLocations(query) {
   const { page, perPage, search } = query;
 
-  const itemsPerPage = perPage ? parseInt(perPage) : 5;
+  const itemsPerPage = perPage ? parseInt(perPage) : 0;
   const skip = page ? (parseInt(page) - 1) * itemsPerPage : 0;
 
   let pagination = {
