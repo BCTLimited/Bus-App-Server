@@ -4,9 +4,43 @@ import validateMongoId from "../utils/validateMongoId.js";
 
 const excludedFields = ["-__v", "-createdAt", "-updatedAt"];
 
-async function getLocations() {
-  const locations = await Location.find({}).select(excludedFields);
-  return locations;
+async function getLocations(query) {
+  const { page, perPage, search } = query;
+
+  const itemsPerPage = perPage ? parseInt(perPage) : 5;
+  const skip = page ? (parseInt(page) - 1) * itemsPerPage : 0;
+
+  let pagination = {
+    totalPages: 0,
+    totalCount: 0,
+  };
+
+  let conditions = {};
+
+  // If there's a search query, add it to the conditions
+  if (search) {
+    conditions = {
+      $or: [
+        { name: { $regex: new RegExp(search, "i") } }, // Search by name
+        { LGA: { $regex: new RegExp(search, "i") } }, // Search by LGA
+      ],
+    };
+  }
+
+  // Count total number of locations based on conditions
+  const totalCount = await Location.countDocuments(conditions);
+
+  // Calculate total number of pages
+  pagination.totalPages = Math.ceil(totalCount / itemsPerPage);
+  pagination.totalCount = totalCount;
+
+  // Retrieve locations with pagination and conditions
+  const locations = await Location.find(conditions)
+    .select(excludedFields)
+    .skip(skip)
+    .limit(itemsPerPage);
+
+  return { locations, pagination };
 }
 
 async function addLocation(locationDetails) {

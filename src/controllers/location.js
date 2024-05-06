@@ -2,8 +2,10 @@ import asyncWrapper from "../middlewares/asyncWrapper.js";
 import locationService from "../services/locationService.js";
 
 const getLocations = asyncWrapper(async (req, res) => {
-  const locations = await locationService.getLocations();
-  res.status(200).json(locations);
+  const { locations, pagination } = await locationService.getLocations(
+    req.query
+  );
+  res.status(200).json({ locations, pagination });
 });
 
 const addLocation = asyncWrapper(async (req, res) => {

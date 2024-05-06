@@ -20,7 +20,7 @@ router
 
 router
   .route("/:id")
-  .get(isAdmin, getSingleLocation)
+  .get(getSingleLocation)
   .patch(isAdmin, updateLocation)
   .delete(isAdmin, deleteLocation)
   .all(methodNotAllowed);
