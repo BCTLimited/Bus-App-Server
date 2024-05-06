@@ -37,6 +37,7 @@ async function getLocations(query) {
   // Retrieve locations with pagination and conditions
   const locations = await Location.find(conditions)
     .select(excludedFields)
+    .sort({ createdAt: -1 })
     .skip(skip)
     .limit(itemsPerPage);
 
