@@ -26,10 +26,14 @@ async function rateRide(userId, routeId, ratingDetails) {
     throw customError(400, `${routeId} is not a valid ID`);
   }
 
-  const route = Route.findById(routeId);
+  const route = await Route.findById(routeId);
 
   if (!route) {
     throw customError(400, `Route does not exist`);
+  }
+
+  if (route.status !== "completed" && route.status !== "cancelled") {
+    throw customError(400, `Please wait for ride to finish before rating`);
   }
 
   const rating = await Rating.create({
