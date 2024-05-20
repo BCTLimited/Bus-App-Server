@@ -29,7 +29,7 @@ async function rateRide(userId, routeId, ratingDetails) {
   const route = await Route.findById(routeId);
 
   if (!route) {
-    throw customError(400, `Route does not exist`);
+    throw customError(404, `Route with ID:${routeId} not found`);
   }
 
   if (route.status !== "completed" && route.status !== "cancelled") {

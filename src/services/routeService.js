@@ -179,7 +179,7 @@ async function updateRoute(routeId, updatedDetails) {
       runValidators: true,
     }).select(excludedFields);
     if (!route) {
-      throw customError(404, "Route not found");
+      throw customError(404, `Route with ID:${routeId} not found`);
     }
     return route;
   } catch (error) {
@@ -197,7 +197,7 @@ async function deleteRoute(routeId) {
     const route = await Route.findById(routeId);
 
     if (!route) {
-      throw customError(404, "Route not found");
+      throw customError(404, `Route with ID:${routeId} not found`);
     }
 
     // Check if any seat has been booked
@@ -251,7 +251,7 @@ async function getRouteDetails(routeId) {
       })
       .lean();
     if (!route) {
-      throw customError(404, "Route not found");
+      throw customError(404, `Route with ID:${routeId} not found`);
     }
     return route;
   } catch (error) {
