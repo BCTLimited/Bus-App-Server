@@ -6,6 +6,7 @@ import generateOTP from "../utils/generateOTP.js";
 import emailUtils from "../utils/emailUtils.js";
 import generateToken from "../config/generateToken.js";
 import asyncWrapper from "../middlewares/asyncWrapper.js";
+import uploadService from "../services/uploadService.js";
 
 // SignUp User
 const signUpUser = asyncWrapper(async (req, res, next) => {
