@@ -113,7 +113,7 @@ const deleteUser = asyncWrapper(async (req, res, next) => {
 
   const updatedUserInfo = {
     status: "inactive",
-    phoneNumber: "00000000000",
+    phoneNumber: `081${formattedDate + formattedTime}22`,
     email: `Anon${formattedDate + formattedTime}@gmail.com`,
     userName: "Anonymous",
     lastName: "Anonymous",
