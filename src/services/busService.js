@@ -41,7 +41,6 @@ async function getAvailableBuses(query) {
 
     return { buses, count, pagination };
   } catch (error) {
-    console.log("Error getting available buses: " + error.message);
     throw error;
   }
 }
@@ -58,7 +57,6 @@ async function addNewBus(busDetails) {
     const bus = await Bus.create({ ...busDetails });
     return bus;
   } catch (error) {
-    console.log("Error adding new bus: " + error.message);
     throw error;
   }
 }
@@ -76,7 +74,6 @@ async function updateBus(busId, updatedDetails) {
     }
     return bus;
   } catch (error) {
-    console.log("Error updating bus: " + error.message);
     throw error;
   }
 }
@@ -92,7 +89,6 @@ async function getBusDetails(busId) {
     }
     return bus;
   } catch (error) {
-    console.log("Error getting bus details: " + error.message);
     throw error;
   }
 }

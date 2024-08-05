@@ -134,7 +134,6 @@ async function getAllRiders(query) {
 
     return { riders, count, pagination, monthlyStats };
   } catch (error) {
-    console.log("Error getting riders: " + error.message);
     throw error;
   }
 }
@@ -160,7 +159,6 @@ async function getRider(riderId) {
     }
     return rider;
   } catch (error) {
-    console.log("Error getting rider: " + error.message);
     throw error;
   }
 }

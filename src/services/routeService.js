@@ -123,7 +123,6 @@ async function getAvailableRoutes(query) {
 
     return { routes, count, counts, pagination };
   } catch (error) {
-    console.log("Error getting available routes: " + error.message);
     throw error;
   }
 }
@@ -168,7 +167,6 @@ async function addNewRoute(routeDetails) {
     });
     return route;
   } catch (error) {
-    console.log("Error adding new route: " + error.message);
     throw error;
   }
 }
@@ -188,7 +186,6 @@ async function updateRoute(routeId, updatedDetails) {
     }
     return route;
   } catch (error) {
-    console.log("Error updating route: " + error.message);
     throw error;
   }
 }
@@ -218,7 +215,6 @@ async function deleteRoute(routeId) {
 
     return route;
   } catch (error) {
-    console.log("Error getting route details: " + error.message);
     throw error;
   }
 }
@@ -260,7 +256,6 @@ async function getRouteDetails(routeId) {
     }
     return route;
   } catch (error) {
-    console.log("Error getting route details: " + error.message);
     throw error;
   }
 }

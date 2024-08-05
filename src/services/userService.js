@@ -75,10 +75,9 @@ async function updateUserProfile(userId, userDetails) {
       throw customError(400, "User Profile Not Found");
     }
 
-    console.log(userProfile);
+
     return { message: "Details Updated Successfully!", userProfile };
-  } catch (error) {
-    console.log(`Error updating userProfile Model ${error.message}`);
+  } catch (error) {;
     throw error;
   }
 }
@@ -92,7 +91,6 @@ async function updateUserModel(userId, userInfo) {
     }
     return { message: "User Info Updated Successfully!" };
   } catch (error) {
-    console.log(`Error updating user Model ${error.message}`);
     throw error;
   }
 }

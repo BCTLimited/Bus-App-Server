@@ -6,7 +6,6 @@ function getUserPushToken(userId) {
 }
 
 function sendPushNotification(tokens, title, body, data) {
-  console.log("Push notification sent:", { tokens, title, body, data });
   // Implement the actual logic to send push notifications to Expo clients here
 }
 
@@ -28,7 +27,7 @@ function sendNotification(userId, departureTime) {
       { departureTime }
     );
   } else {
-    console.error(`Failed to retrieve push token for user ${userId}`);
+
   }
 }
 

@@ -16,13 +16,9 @@ function generateCode() {
   return `${randomNumber}-${randomLetters}`;
 }
 
-// console.log(generateCode()); // Example output: "8826-AB"
+
 
 async function isCodeUnique(code) {
-  // Implement logic to check if the code already exists in the database
-  // You may use a database query to check if the code exists
-  // For example, you can use Mongoose to query your MongoDB database
-  // Return true if the code is unique, false otherwise
   const busCode = await Trip.findOne({ code });
   if (!busCode) {
     return false;

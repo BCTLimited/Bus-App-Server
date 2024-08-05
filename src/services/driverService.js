@@ -117,7 +117,6 @@ async function getAllDrivers(query) {
       const totalRecords = totalRecordsResult[0]?.count
         ? totalRecordsResult[0].count
         : 0;
-      console.log(totalRecords);
       pagination.totalCount = totalRecords;
       pipeline.push({ $skip: skip });
       pipeline.push({ $limit: itemsPerPage });
@@ -129,7 +128,6 @@ async function getAllDrivers(query) {
 
     return { drivers, count, pagination };
   } catch (error) {
-    console.log("Error getting available drivers: " + error.message);
     throw error;
   }
 }
@@ -159,7 +157,6 @@ async function addNewDriver(driverDetails, files) {
   }
 
   try {
-    console.log(driverDetails);
     // Register a Driver and verify thier profile
     const { user, userProfile } = await userService.registerUser({
       ...driverDetails,
@@ -182,7 +179,6 @@ async function addNewDriver(driverDetails, files) {
     });
     return driver;
   } catch (error) {
-    console.log("Error adding new driver: " + error.message);
     throw error;
   }
 }
@@ -219,14 +215,12 @@ async function updateDriver(driverId, updatedDetails) {
 
     const userId = driver.userId._id;
 
-    console.log(userId);
     // Update user model and profile
     await userService.updateUserModel(userId, updatedDetails);
     await userService.updateUserProfile(userId, updatedDetails);
 
     return driver;
   } catch (error) {
-    console.log("Error updating driver: " + error.message);
     throw error;
   }
 }
@@ -250,7 +244,6 @@ async function getDriverDetails(driverId) {
 
     return driver;
   } catch (error) {
-    console.log("Error getting driver details: " + error.message);
     throw error;
   }
 }

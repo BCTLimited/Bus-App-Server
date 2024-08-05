@@ -106,7 +106,6 @@ async function updateTrip(tripId, updatedDetails) {
     throw customError(400, `${tripId} is not a valid ID`);
   }
 
-  console.log(updatedDetails);
   const { paymentStatus } = updatedDetails;
 
   const trip = await Trip.findOneAndUpdate(
@@ -114,8 +113,6 @@ async function updateTrip(tripId, updatedDetails) {
     { paymentStatus },
     { new: true }
   );
-
-  console.log(trip);
 
   if (!trip) {
     throw customError(404, `Trip not found`);
@@ -155,12 +152,9 @@ async function updateSeatAvailability(routeId, seatNumbers, userId) {
     await busRoute.save({ session });
     await session.commitTransaction();
     session.endSession();
-
-    console.log(`Seat ${seatNumbers} on bus ${routeId} updated successfully`);
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    console.error("Error occurred:", error.message);
     throw error;
   }
 }
