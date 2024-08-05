@@ -2,8 +2,13 @@ import asyncWrapper from "../middlewares/asyncWrapper.js";
 import RouteService from "../services/routeService.js";
 
 const getAvailableRoutes = asyncWrapper(async (req, res, next) => {
+  // Get the current time and the time 48 hours later
+  const currentTime = new Date();
+  const nextDayTime = new Date(currentTime.getTime() + 48 * 60 * 60 * 1000);
+  const startDate = currentTime.toISOString().split("T")[0];
+  const endDate = nextDayTime.toISOString().split("T")[0];
   const { routes, count, counts, pagination } =
-    await RouteService.getAvailableRoutes(req.query);
+    await RouteService.getAvailableRoutes({ ...req.query, startDate, endDate });
   res.status(200).json({ routes, count, counts, pagination });
 });
 
