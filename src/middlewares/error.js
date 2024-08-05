@@ -29,7 +29,7 @@ const errorMiddleware = (err, req, res, next) => {
     }
   }
 
-  // console.log(err);
+  console.log(err);
 
   // Handling MongoDB duplicate key error
   if (err.code === 11000) {

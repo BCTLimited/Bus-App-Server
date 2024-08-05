@@ -45,8 +45,13 @@ async function getAvailableRoutes(query) {
     conditions.status = status;
   }
 
-  // const currentDate = new Date(new Date(dateUtility.getCurrentDate())); // Get the current date
-  // const nextDay = new Date(new Date(dateUtility.getCurrentDate(24))); // Get the current date plus 24 hours
+  const currentDate = new Date(new Date(dateUtility.getCurrentDate())); // Get the current date
+  const nextDay = new Date(new Date(dateUtility.getCurrentDate(24))); // Get the current date plus 24 hours
+
+  conditions.$and = [
+    { departureDate: { $gte: currentDate } }, // Departure time should be greater than or equal to current date
+    { departureDate: { $lt: nextDay } }, // Departure time should be less than next day's date
+  ];
 
   if (startDate && endDate) {
     conditions.$and = [
