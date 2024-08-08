@@ -1,6 +1,7 @@
 import UserProfile from "../models/userProfile.js";
 import User from "../models/user.js";
 import customError from "../utils/customError.js";
+import user from "../models/user.js";
 // const validateMongoId = require("../utils/validateMongoId");
 
 const excludedFields = ["-password", "-__v", "-createdAt", "-updatedAt"];
@@ -18,6 +19,12 @@ async function registerUser(userData) {
   const missingField = fields.find((field) => !userData[field]);
   if (missingField) {
     throw customError(400, `${missingField} is required!`);
+  }
+
+  const user = await User.findOne({ email: userData?.email.toLowerCase() });
+
+  if (user) {
+    throw customError(400, "User with this email already exists");
   }
 
   try {
@@ -75,9 +82,8 @@ async function updateUserProfile(userId, userDetails) {
       throw customError(400, "User Profile Not Found");
     }
 
-
     return { message: "Details Updated Successfully!", userProfile };
-  } catch (error) {;
+  } catch (error) {
     throw error;
   }
 }

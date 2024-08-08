@@ -24,7 +24,7 @@ const UserSchema = new Schema(
         /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
         "Please provide a valid email",
       ],
-      unique: true,
+      unique: [true, "User with this email already exists"],
     },
     password: {
       type: String,
@@ -38,7 +38,6 @@ const UserSchema = new Schema(
         /^(0)(7|8|9){1}(0|1){1}[0-9]{8}$/,
         "Please enter a valid Nigerian phone number",
       ],
-      unique: true,
     },
     role: {
       type: String,
